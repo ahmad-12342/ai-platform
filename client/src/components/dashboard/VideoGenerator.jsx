@@ -9,26 +9,49 @@ const aspectRatios = [
     { id: '1:1', label: '1:1 Square', icon: '⏹️' },
 ];
 
-const durations = ['5s', '10s', '15s'];
+const durations = ['8s'];
 
 const VideoGenerator = () => {
     const [prompt, setPrompt] = useState('');
     const [aspect, setAspect] = useState('16:9');
-    const [duration, setDuration] = useState('5s');
+    const [duration, setDuration] = useState('8s');
     const [motionLevel, setMotionLevel] = useState(5);
     const [generating, setGenerating] = useState(false);
     const [videoUrl, setVideoUrl] = useState(null);
 
     const handleGenerate = async () => {
         if (!prompt) return;
+
+        console.log("Generating with OpenAI Video Model...");
         setGenerating(true);
         setVideoUrl(null);
 
-        // Simulating Video Generation
-        setTimeout(() => {
-            setVideoUrl('https://sample-videos.com/video123/mp4/720/big_buck_bunny_720p_1mb.mp4');
+        try {
+            const finalPrompt = `${prompt}, high quality 8s scene, ${aspect} aspect ratio`;
+
+            const response = await fetch('/api/generate-video', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    prompt: finalPrompt,
+                    duration: duration
+                })
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                console.error("OpenAI video error string:", data.error);
+                throw new Error(data.error || 'Failed to generate video');
+            }
+
+            setVideoUrl(data.url);
+        } catch (error) {
+            console.error("Video generation failed:", error);
+            alert("Oops! OpenAI failed to render the video: " + error.message);
+        } finally {
             setGenerating(false);
-        }, 5000);
+        }
     };
 
     const handleDownload = async () => {
@@ -168,7 +191,7 @@ const VideoGenerator = () => {
                                             <motion.div
                                                 initial={{ width: "0%" }}
                                                 animate={{ width: "100%" }}
-                                                transition={{ duration: 5, ease: "linear" }}
+                                                transition={{ duration: 8, ease: "linear" }}
                                                 className="h-full bg-gradient-to-r from-purple-500 to-blue-500"
                                             />
                                         </div>
