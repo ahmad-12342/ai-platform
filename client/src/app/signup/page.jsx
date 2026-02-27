@@ -35,8 +35,8 @@ export default function SignupPage() {
 
     return (
         <div className="min-h-screen pt-24 pb-12 flex items-center justify-center relative z-10 px-6">
-            <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/20 rounded-full blur-[100px] pointer-events-none" />
-            <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-600/20 rounded-full blur-[100px] pointer-events-none" />
+            <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/20 rounded-full blur-3xl opacity-60 pointer-events-none will-change-transform" />
+            <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-600/20 rounded-full blur-3xl opacity-60 pointer-events-none will-change-transform" />
 
             <motion.div
                 initial={{ opacity: 0, y: 20 }}

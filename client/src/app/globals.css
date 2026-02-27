@@ -40,13 +40,17 @@ body {
 @layer utilities {
   .glass {
     backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
     background: rgba(255, 255, 255, 0.05);
     border: 1px solid rgba(255, 255, 255, 0.1);
+    transform: translateZ(0);
+    will-change: backdrop-filter;
   }
 
   .text-gradient {
     background: linear-gradient(to right, #6366f1, #a855f7, #ec4899);
     -webkit-background-clip: text;
+    background-clip: text;
     -webkit-text-fill-color: transparent;
   }
 
