@@ -1,0 +1,75 @@
+"use client";
+import React, { useState, useEffect } from 'react';
+import Link from 'next/link';
+import { motion } from 'framer-motion';
+import { Sparkles, Menu, X, Sun, Moon } from 'lucide-react';
+
+const Navbar = () => {
+    const [scrolled, setScrolled] = useState(false);
+    const [mobileMenu, setMobileMenu] = useState(false);
+
+    useEffect(() => {
+        const handleScroll = () => setScrolled(window.scrollY > 20);
+        window.addEventListener('scroll', handleScroll);
+        return () => window.removeEventListener('scroll', handleScroll);
+    }, []);
+
+    return (
+        <nav className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 ${scrolled ? 'py-4 glass border-b border-white/10' : 'py-6 bg-transparent'
+            }`}>
+            <div className="container mx-auto px-6 flex items-center justify-between">
+                <Link href="/" className="flex items-center gap-2">
+                    <div className="w-10 h-10 bg-gradient-to-tr from-blue-600 to-purple-600 rounded-xl flex items-center justify-center shadow-lg transform rotate-3">
+                        <Sparkles className="text-white w-6 h-6" />
+                    </div>
+                    <span className="text-2xl font-bold tracking-tight">Promptova<span className="text-primary italic">AI</span></span>
+                </Link>
+
+                {/* Desktop Links */}
+                <div className="hidden md:flex items-center gap-8">
+                    {['Features', 'Pricing', 'FAQ'].map((link) => (
+                        <Link key={link} href={`/#${link.toLowerCase()}`} className="text-gray-400 hover:text-white transition-colors font-medium">
+                            {link}
+                        </Link>
+                    ))}
+                </div>
+
+                <div className="flex items-center gap-4">
+                    <Link href="/login" className="hidden md:block font-medium text-gray-400 hover:text-white">
+                        Login
+                    </Link>
+                    <Link href="/signup">
+                        <button className="px-6 py-2 rounded-full font-bold bg-primary hover:bg-primary/80 text-white shadow-lg transition-all">
+                            Sign Up
+                        </button>
+                    </Link>
+
+                    <button
+                        className="md:hidden text-white"
+                        onClick={() => setMobileMenu(!mobileMenu)}
+                    >
+                        {mobileMenu ? <X /> : <Menu />}
+                    </button>
+                </div>
+            </div>
+
+            {/* Mobile Menu */}
+            {mobileMenu && (
+                <motion.div
+                    initial={{ opacity: 0, y: -20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="absolute top-full left-0 w-full glass border-b border-white/10 p-6 flex flex-col gap-4 md:hidden"
+                >
+                    {['Features', 'Pricing', 'FAQ'].map((link) => (
+                        <Link key={link} href={`/#${link.toLowerCase()}`} onClick={() => setMobileMenu(false)} className="text-lg font-medium">
+                            {link}
+                        </Link>
+                    ))}
+                    <Link href="/login" onClick={() => setMobileMenu(false)} className="text-lg font-medium">Login</Link>
+                </motion.div>
+            )}
+        </nav>
+    );
+};
+
+export default Navbar;
