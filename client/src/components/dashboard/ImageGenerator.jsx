@@ -33,6 +33,30 @@ const ImageGenerator = () => {
         }, 3000);
     };
 
+    const handleDownload = async () => {
+        if (!result) return;
+        try {
+            const response = await fetch(result);
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.style.display = 'none';
+            a.href = url;
+            a.download = `promptova-ai-image-${Date.now()}.jpg`;
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+        } catch (error) {
+            console.error('Download failed:', error);
+            // Fallback: open in new tab
+            window.open(result, '_blank');
+        }
+    };
+
+    const handleRegenerate = () => {
+        handleGenerate();
+    };
+
     return (
         <div className="max-w-6xl mx-auto space-y-12">
             <motion.header
@@ -124,11 +148,17 @@ const ImageGenerator = () => {
                                         <p className="text-gray-300 text-sm">Resolution: {resolution}</p>
                                     </div>
                                     <div className="flex gap-4">
-                                        <button className="flex items-center gap-2 px-6 py-3 bg-white text-black rounded-full font-bold hover:scale-105 transition-transform">
+                                        <button
+                                            onClick={handleDownload}
+                                            className="flex items-center gap-2 px-6 py-3 bg-white text-black rounded-full font-bold hover:scale-105 transition-transform"
+                                        >
                                             <Download className="w-5 h-5" />
                                             Download 4K
                                         </button>
-                                        <button className="flex items-center gap-2 px-6 py-3 glass text-white rounded-full font-bold hover:scale-105 transition-transform border border-white/20">
+                                        <button
+                                            onClick={handleRegenerate}
+                                            className="flex items-center gap-2 px-6 py-3 glass text-white rounded-full font-bold hover:scale-105 transition-transform border border-white/20"
+                                        >
                                             <RefreshCw className="w-5 h-5" />
                                             Regenerate
                                         </button>

@@ -15,7 +15,9 @@ const CVGenerator = () => {
         education: [{ school: 'University of AI', degree: 'MS in Computer Science' }]
     });
 
-    const [isPreview, setIsPreview] = useState(false);
+    const handleExportPDF = () => {
+        window.print();
+    };
 
     return (
         <div className="space-y-8">
@@ -27,7 +29,7 @@ const CVGenerator = () => {
                     </h1>
                     <p className="text-gray-400">Build an ATS-optimized professional resume in minutes.</p>
                 </div>
-                <div className="flex gap-4">
+                <div className="flex gap-4 print:hidden">
                     <button
                         onClick={() => setIsPreview(!isPreview)}
                         className="px-6 py-2 rounded-xl glass border border-white/10 hover:bg-white/5 transition-all flex items-center gap-2"
@@ -35,7 +37,10 @@ const CVGenerator = () => {
                         {isPreview ? <Edit3 className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                         {isPreview ? 'Edit Mode' : 'Preview Result'}
                     </button>
-                    <button className="px-6 py-2 rounded-xl bg-primary hover:bg-primary/80 text-white transition-all flex items-center gap-2 shadow-lg">
+                    <button
+                        onClick={handleExportPDF}
+                        className="px-6 py-2 rounded-xl bg-primary hover:bg-primary/80 text-white transition-all flex items-center gap-2 shadow-lg"
+                    >
                         <Download className="w-4 h-4" />
                         Export PDF
                     </button>
@@ -57,8 +62,8 @@ const CVGenerator = () => {
                                     key={item.id}
                                     onClick={() => setActiveTab(item.id)}
                                     className={`w-full p-4 rounded-xl flex items-center gap-3 transition-all ${activeTab === item.id
-                                            ? 'bg-primary text-white shadow-lg'
-                                            : 'glass text-gray-400 hover:bg-white/5 hover:text-white'
+                                        ? 'bg-primary text-white shadow-lg'
+                                        : 'glass text-gray-400 hover:bg-white/5 hover:text-white'
                                         }`}
                                 >
                                     <item.icon className="w-5 h-5" />

@@ -31,6 +31,29 @@ const VideoGenerator = () => {
         }, 5000);
     };
 
+    const handleDownload = async () => {
+        if (!videoUrl) return;
+        try {
+            const response = await fetch(videoUrl);
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.style.display = 'none';
+            a.href = url;
+            a.download = `promptova-ai-video-${Date.now()}.mp4`;
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+        } catch (error) {
+            console.error('Download failed:', error);
+            window.open(videoUrl, '_blank');
+        }
+    };
+
+    const handleRegenerate = () => {
+        handleGenerate();
+    };
+
     return (
         <div className="max-w-6xl mx-auto space-y-12">
             <motion.header
@@ -123,8 +146,17 @@ const VideoGenerator = () => {
                                     loop
                                 />
                                 <div className="absolute top-6 right-6 flex gap-2">
-                                    <button className="p-3 glass text-white rounded-full hover:scale-110 transition-all border border-white/10">
+                                    <button
+                                        onClick={handleDownload}
+                                        className="p-3 glass text-white rounded-full hover:scale-110 transition-all border border-white/10"
+                                    >
                                         <Download className="w-5 h-5" />
+                                    </button>
+                                    <button
+                                        onClick={handleRegenerate}
+                                        className="p-3 glass text-white rounded-full hover:scale-110 transition-all border border-white/10"
+                                    >
+                                        <RefreshCw className="w-5 h-5" />
                                     </button>
                                 </div>
                             </motion.div>

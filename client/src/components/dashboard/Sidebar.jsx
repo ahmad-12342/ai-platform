@@ -32,7 +32,7 @@ const Sidebar = () => {
     const pathname = usePathname();
 
     return (
-        <aside className="w-64 h-screen glass border-r border-white/10 flex flex-col p-6 fixed left-0 top-0">
+        <aside className="w-64 h-screen glass border-r border-white/10 flex flex-col p-6 fixed left-0 top-0 print:hidden">
             <Link href="/" className="flex items-center gap-2 mb-10 pl-2">
                 <Sparkles className="text-primary w-6 h-6" />
                 <span className="text-xl font-bold">Promptova</span>

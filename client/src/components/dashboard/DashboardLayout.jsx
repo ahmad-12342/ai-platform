@@ -5,7 +5,7 @@ const DashboardLayout = ({ children }) => {
     return (
         <div className="min-h-screen bg-background text-foreground">
             <Sidebar />
-            <main className="ml-64 p-8 min-h-screen">
+            <main className="ml-64 p-8 min-h-screen print:ml-0 print:p-0">
                 <div className="max-w-6xl mx-auto">
                     {children}
                 </div>
