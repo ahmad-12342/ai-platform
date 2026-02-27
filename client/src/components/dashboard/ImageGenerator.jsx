@@ -23,25 +23,27 @@ const ImageGenerator = () => {
     const [status, setStatus] = useState('');
     const [imageLoading, setImageLoading] = useState(false);
 
-    const handleGenerate = () => {
-        if (!prompt && !referenceImage) return;
+    const handleGenerate = async () => {
+        if (!prompt.trim() && !referenceImage) return;
 
+        console.log("Starting generation...");
         setGenerating(true);
         setResult(null);
         setImageLoading(true);
 
-        const seed = Math.floor(Math.random() * 10000000);
-        const [width, height] = resolution.split('x');
+        // Random parameters
+        const seed = Math.floor(Math.random() * 9999999);
+        const [w, h] = resolution.split('x');
 
-        // Bulletproof prompt encoding
-        const safePrompt = prompt.trim() || "modern art";
-        const encodedPrompt = encodeURIComponent(safePrompt);
+        // Build style-aware prompt
+        const finalPrompt = `${selectedStyle} style, ${prompt.trim() || "art"}`;
+        const encoded = encodeURIComponent(finalPrompt);
 
-        // THE MOST STABLE URL FOR POLLINATIONS
-        const imageUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=${width}&height=${height}&seed=${seed}&nologo=true&model=flux`;
+        // Fast URL
+        const url = `https://pollinations.ai/p/${encoded}?width=${w}&height=${h}&seed=${seed}&model=flux&nologo=true`;
 
-        // Inject result
-        setResult(imageUrl);
+        // Immediate update to UI
+        setResult(url);
         setGenerating(false);
     };
 
@@ -185,27 +187,25 @@ const ImageGenerator = () => {
                                 className="w-full h-full relative bg-gray-900"
                             >
                                 {imageLoading && (
-                                    <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-black/80 backdrop-blur-sm">
-                                        <div className="w-12 h-12 border-2 border-blue-500 border-t-transparent rounded-full animate-spin mb-4"></div>
-                                        <p className="text-blue-400 font-medium animate-pulse">Neural Engine is Creating...</p>
+                                    <div className="absolute inset-0 z-30 flex flex-col items-center justify-center bg-black/90 transition-all">
+                                        <div className="w-12 h-12 border-2 border-primary border-t-transparent rounded-full animate-spin mb-4"></div>
+                                        <p className="text-white font-bold animate-pulse uppercase tracking-[0.2em] text-[10px]">AI Rendering...</p>
                                     </div>
                                 )}
                                 <img
                                     key={result}
                                     src={result}
-                                    alt="AI Generated"
-                                    className="w-full h-full object-contain relative z-10 block"
+                                    alt="Result"
+                                    className="w-full h-full object-contain relative z-10"
                                     onLoad={() => setImageLoading(false)}
-                                    onError={(e) => {
-                                        e.target.onerror = null;
-                                        e.target.src = "https://via.placeholder.com/1024x1024.png?text=AI+Result+Ready+-+Click+Below";
+                                    onError={() => {
                                         setImageLoading(false);
                                     }}
                                 />
-                                <div className="absolute inset-x-0 bottom-6 z-40 flex justify-center">
-                                    <a href={result} target="_blank" rel="noreferrer" className="bg-primary hover:bg-primary/90 text-white px-10 py-4 rounded-full text-base font-black shadow-[0_0_30px_rgba(99,102,241,0.5)] transition-all flex items-center gap-3">
-                                        <Sparkles className="w-5 h-5" />
-                                        OPEN HD IMAGE
+                                <div className="absolute top-6 left-6 z-40">
+                                    <a href={result} target="_blank" rel="noreferrer" className="bg-white text-black px-6 py-2.5 rounded-full text-[11px] font-black uppercase shadow-2xl hover:bg-primary hover:text-white transition-all flex items-center gap-2">
+                                        <Sparkles className="w-4 h-4" />
+                                        Manual View Link
                                     </a>
                                 </div>
                                 <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-6">
