@@ -1,7 +1,7 @@
 "use client";
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { ImageIcon, Download, Sparkles, Wand2, RefreshCw } from 'lucide-react';
+import { ImageIcon, Download, Sparkles, Wand2, RefreshCw, Upload, X } from 'lucide-react';
 
 const styles = [
     { id: 'realistic', label: 'Realistic', icon: '📸' },
@@ -19,18 +19,31 @@ const ImageGenerator = () => {
     const [resolution, setResolution] = useState('1024x1024');
     const [generating, setGenerating] = useState(false);
     const [result, setResult] = useState(null);
+    const [referenceImage, setReferenceImage] = useState(null);
 
     const handleGenerate = async () => {
-        if (!prompt) return;
+        if (!prompt && !referenceImage) return;
         setGenerating(true);
         setResult(null); // Clear previous result
 
-        // Simulating AI Generation with Unsplash as a result (for demo)
+        // Simulating AI Generation
         setTimeout(() => {
             const seed = Math.floor(Math.random() * 1000);
-            setResult(`https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?auto=format&fit=crop&q=80&w=1000&seed=${seed}`);
+            const query = referenceImage ? 'variation' : 'nature';
+            setResult(`https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?auto=format&fit=crop&q=80&w=1000&seed=${seed}&sig=${query}`);
             setGenerating(false);
         }, 3000);
+    };
+
+    const handleImageUpload = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setReferenceImage(reader.result);
+            };
+            reader.readAsDataURL(file);
+        }
     };
 
     const handleDownload = async () => {
@@ -83,18 +96,38 @@ const ImageGenerator = () => {
                     <div className="glass p-2 rounded-[2rem] border border-white/10 shadow-2xl focus-within:border-primary/50 transition-all flex flex-col md:flex-row items-center gap-2">
                         <div className="flex-1 flex items-center px-6 w-full">
                             <ImageIcon className="w-6 h-6 text-gray-400 mr-4" />
+                            {referenceImage && (
+                                <div className="relative w-12 h-12 mr-4 group">
+                                    <img src={referenceImage} alt="Ref" className="w-full h-full object-cover rounded-lg border border-white/20" />
+                                    <button
+                                        onClick={() => setReferenceImage(null)}
+                                        className="absolute -top-2 -right-2 bg-red-500 text-white p-0.5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                                    >
+                                        <X className="w-3 h-3" />
+                                    </button>
+                                </div>
+                            )}
                             <input
                                 type="text"
                                 value={prompt}
                                 onChange={(e) => setPrompt(e.target.value)}
                                 onKeyDown={(e) => e.key === 'Enter' && handleGenerate()}
-                                placeholder="A cinematic shot of a neon-lit futuristic Tokyo street in the rain..."
+                                placeholder={referenceImage ? "Describe how to modify this image..." : "A cinematic shot of a neon-lit futuristic Tokyo street in the rain..."}
                                 className="w-full bg-transparent border-none outline-none py-6 text-lg text-white placeholder:text-gray-600"
                             />
+                            <div className="flex items-center gap-2 mr-2">
+                                <label className="cursor-pointer p-3 hover:bg-white/10 rounded-full transition-all group relative">
+                                    <Upload className="w-5 h-5 text-gray-400 group-hover:text-primary" />
+                                    <input type="file" className="hidden" accept="image/*" onChange={handleImageUpload} />
+                                    <span className="absolute -top-10 left-1/2 -translate-x-1/2 bg-black text-white text-[10px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                                        Reference Image
+                                    </span>
+                                </label>
+                            </div>
                         </div>
                         <button
                             onClick={handleGenerate}
-                            disabled={generating || !prompt}
+                            disabled={generating || (!prompt && !referenceImage)}
                             className="w-full md:w-auto px-10 py-5 rounded-[1.5rem] bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold transition-all flex items-center justify-center gap-3 shadow-lg shadow-blue-500/20 disabled:opacity-50"
                         >
                             {generating ? (
@@ -105,7 +138,7 @@ const ImageGenerator = () => {
                             ) : (
                                 <>
                                     <Wand2 className="w-5 h-5" />
-                                    Generate
+                                    {referenceImage ? 'Variation' : 'Generate'}
                                 </>
                             )}
                         </button>
