@@ -4,21 +4,29 @@ import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { Mail, Lock, ArrowRight, Sparkles } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { signInWithEmailAndPassword } from 'firebase/auth';
+import { auth } from '@/lib/firebase';
 
 export default function LoginPage() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(false);
+    const [errorMsg, setErrorMsg] = useState('');
     const router = useRouter();
 
-    const handleLogin = (e) => {
+    const handleLogin = async (e) => {
         e.preventDefault();
         setLoading(true);
-        // Simulate login
-        setTimeout(() => {
+        setErrorMsg('');
+        try {
+            await signInWithEmailAndPassword(auth, email, password);
             setLoading(false);
             router.push('/dashboard/images');
-        }, 1500);
+        } catch (error) {
+            console.error('Login error:', error);
+            setErrorMsg(error.message);
+            setLoading(false);
+        }
     };
 
     return (
@@ -38,6 +46,12 @@ export default function LoginPage() {
                     <h1 className="text-3xl font-bold text-white mb-2">Welcome Back</h1>
                     <p className="text-gray-400">Log in to access your AI Neural Engine.</p>
                 </div>
+
+                {errorMsg && (
+                    <div className="mb-6 p-4 rounded-xl bg-red-500/10 border border-red-500/50 text-red-500 text-sm font-medium text-center">
+                        {errorMsg}
+                    </div>
+                )}
 
                 <form onSubmit={handleLogin} className="space-y-6">
                     <div className="space-y-2">

@@ -4,22 +4,33 @@ import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { Mail, Lock, ArrowRight, Sparkles, User } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
+import { auth } from '@/lib/firebase';
 
 export default function SignupPage() {
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(false);
+    const [errorMsg, setErrorMsg] = useState('');
     const router = useRouter();
 
-    const handleSignup = (e) => {
+    const handleSignup = async (e) => {
         e.preventDefault();
         setLoading(true);
-        // Simulate signup
-        setTimeout(() => {
+        setErrorMsg('');
+        try {
+            const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+            await updateProfile(userCredential.user, {
+                displayName: name
+            });
             setLoading(false);
             router.push('/dashboard/images');
-        }, 1500);
+        } catch (error) {
+            console.error('Signup error:', error);
+            setErrorMsg(error.message);
+            setLoading(false);
+        }
     };
 
     return (
@@ -39,6 +50,12 @@ export default function SignupPage() {
                     <h1 className="text-3xl font-bold text-white mb-2">Create Account</h1>
                     <p className="text-gray-400">Join PromptovaAI and start creating today.</p>
                 </div>
+
+                {errorMsg && (
+                    <div className="mb-6 p-4 rounded-xl bg-red-500/10 border border-red-500/50 text-red-500 text-sm font-medium text-center">
+                        {errorMsg}
+                    </div>
+                )}
 
                 <form onSubmit={handleSignup} className="space-y-6">
                     <div className="space-y-2">

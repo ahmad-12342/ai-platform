@@ -2,11 +2,13 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { Sparkles, Menu, X, Sun, Moon } from 'lucide-react';
+import { Sparkles, Menu, X, Sun, Moon, LogOut } from 'lucide-react';
+import { useAuth } from '@/context/AuthContext';
 
 const Navbar = () => {
     const [scrolled, setScrolled] = useState(false);
     const [mobileMenu, setMobileMenu] = useState(false);
+    const { user, logout } = useAuth();
 
     useEffect(() => {
         const handleScroll = () => setScrolled(window.scrollY > 20);
@@ -35,14 +37,29 @@ const Navbar = () => {
                 </div>
 
                 <div className="flex items-center gap-4">
-                    <Link href="/login" className="hidden md:block font-medium text-gray-400 hover:text-white">
-                        Login
-                    </Link>
-                    <Link href="/signup">
-                        <button className="px-6 py-2 rounded-full font-bold bg-primary hover:bg-primary/80 text-white shadow-lg transition-all">
-                            Sign Up
-                        </button>
-                    </Link>
+                    {user ? (
+                        <div className="flex items-center gap-4">
+                            <Link href="/dashboard/images" className="hidden md:block font-medium text-gray-400 hover:text-white transition-colors">
+                                Dashboard
+                            </Link>
+                            <img src={user.photoURL} alt="Profile" className="w-10 h-10 rounded-full border-2 border-primary object-cover" />
+                            <button onClick={logout} className="hidden md:flex items-center gap-2 px-4 py-2 rounded-full font-bold bg-white/10 hover:bg-white/20 text-white transition-all text-sm">
+                                <LogOut className="w-4 h-4" />
+                                Logout
+                            </button>
+                        </div>
+                    ) : (
+                        <>
+                            <Link href="/login" className="hidden md:block font-medium text-gray-400 hover:text-white">
+                                Login
+                            </Link>
+                            <Link href="/signup">
+                                <button className="px-6 py-2 rounded-full font-bold bg-primary hover:bg-primary/80 text-white shadow-lg transition-all">
+                                    Sign Up
+                                </button>
+                            </Link>
+                        </>
+                    )}
 
                     <button
                         className="md:hidden text-white"
@@ -65,7 +82,16 @@ const Navbar = () => {
                             {link}
                         </Link>
                     ))}
-                    <Link href="/login" onClick={() => setMobileMenu(false)} className="text-lg font-medium">Login</Link>
+                    {user ? (
+                        <>
+                            <Link href="/dashboard/images" onClick={() => setMobileMenu(false)} className="text-lg font-medium">Dashboard</Link>
+                            <button onClick={() => { logout(); setMobileMenu(false); }} className="text-lg font-medium text-left flex items-center gap-2 text-red-400">
+                                <LogOut className="w-5 h-5" /> Logout
+                            </button>
+                        </>
+                    ) : (
+                        <Link href="/login" onClick={() => setMobileMenu(false)} className="text-lg font-medium">Login</Link>
+                    )}
                 </motion.div>
             )}
         </nav>
