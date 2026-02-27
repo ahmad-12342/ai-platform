@@ -93,8 +93,8 @@ const ImageGenerator = () => {
                                 key={s.id}
                                 onClick={() => setSelectedStyle(s.id)}
                                 className={`px-4 py-2 rounded-full text-sm font-medium transition-all border ${selectedStyle === s.id
-                                        ? 'bg-blue-500/20 border-blue-500/50 text-blue-400'
-                                        : 'bg-white/5 border-white/5 text-gray-500 hover:border-white/20'
+                                    ? 'bg-blue-500/20 border-blue-500/50 text-blue-400'
+                                    : 'bg-white/5 border-white/5 text-gray-500 hover:border-white/20'
                                     }`}
                             >
                                 <span className="mr-2">{s.icon}</span>
@@ -165,4 +165,3 @@ const ImageGenerator = () => {
 };
 
 export default ImageGenerator;
-

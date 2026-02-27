@@ -82,7 +82,7 @@ const Testimonials = () => (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                 {testimonials.map((t, i) => (
                     <div key={i} className="glass p-8 rounded-3xl border border-white/5">
-                        <p className="text-lg italic mb-6 text-gray-300">"{t.content}"</p>
+                        <p className="text-lg italic mb-6 text-gray-300">&quot;{t.content}&quot;</p>
                         <div className="flex items-center gap-4">
                             <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center font-bold text-primary">
                                 {t.avatar}

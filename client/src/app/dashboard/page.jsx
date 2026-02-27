@@ -92,7 +92,7 @@ export default function Page() {
                         </div>
                         <h2 className="text-xl font-bold mb-4">Pro Promptova Tip</h2>
                         <p className="text-gray-300 mb-6 leading-relaxed text-sm">
-                            Use more descriptive prompts to get better results. For images, try adding lighting details like "cinematic lighting" or "golden hour" to make your creations stand out.
+                            Use more descriptive prompts to get better results. For images, try adding lighting details like &quot;cinematic lighting&quot; or &quot;golden hour&quot; to make your creations stand out.
                         </p>
                         <button className="px-6 py-2 rounded-full bg-white text-black font-bold text-sm hover:bg-gray-200 transition-colors">
                             Read Guide

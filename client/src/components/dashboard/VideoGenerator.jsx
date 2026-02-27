@@ -42,7 +42,7 @@ const VideoGenerator = () => {
                     <Video className="w-3 h-3" />
                     Temporal Diffusion Engine
                 </div>
-                <h1 className="text-4xl md:text-5xl font-bold mb-4">Director's <span className="text-gradient">Studio</span></h1>
+                <h1 className="text-4xl md:text-5xl font-bold mb-4">Director&apos;s <span className="text-gradient">Studio</span></h1>
                 <p className="text-gray-400 max-w-xl mx-auto">Turn your stories into cinematic video sequences with high-fidelity motion.</p>
             </motion.header>
 
@@ -163,4 +163,3 @@ const VideoGenerator = () => {
 };
 
 export default VideoGenerator;
-

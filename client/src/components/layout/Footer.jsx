@@ -16,7 +16,7 @@ const Footer = () => {
                             <span className="text-xl font-bold">Promptova AI</span>
                         </Link>
                         <p className="text-gray-400 mb-6">
-                            The world's most advanced AI content platform for professional creators.
+                            The world&apos;s most advanced AI content platform for professional creators.
                         </p>
                         <div className="flex gap-4">
                             <Twitter className="w-6 h-6 text-gray-500 hover:text-white cursor-pointer transition-colors" />
