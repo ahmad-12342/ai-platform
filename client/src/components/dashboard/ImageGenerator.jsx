@@ -29,26 +29,26 @@ const ImageGenerator = () => {
         setGenerating(true);
         setResult(null);
         setImageLoading(true);
-        setStatus('Initializing Neural Engine...');
+        setStatus('Connecting to Neural Engine...');
 
-        const seed = Math.floor(Math.random() * 1000000);
+        // Random seed for unique results
+        const seed = Math.floor(Math.random() * 9999999);
         const [width, height] = resolution.split('x');
 
-        // Build a clean prompt
-        const cleanPrompt = prompt.trim() || (referenceImage ? "image variation" : "artistic masterpiece");
-        const stylePrefix = selectedStyle !== 'realistic' ? `${selectedStyle} style ` : "";
-        const finalPrompt = `${stylePrefix}${cleanPrompt}`.trim();
-        const encodedPrompt = encodeURIComponent(finalPrompt);
+        // Preparing the prompt
+        const cleanPrompt = prompt.trim() || (referenceImage ? "variation of uploaded image" : "cinematic masterpiece");
+        const styleText = selectedStyle !== 'realistic' ? `${selectedStyle} style, ` : "";
+        const finalPrompt = `${styleText}${cleanPrompt}, high quality, 4k, detailed`.trim();
 
-        // Use the most direct and reliable pollinations endpoint
-        const imageUrl = `https://pollinations.ai/p/${encodedPrompt}?width=${width}&height=${height}&seed=${seed}&model=flux`;
+        // Direct High-Speed Image Endpoint
+        const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(finalPrompt)}?width=${width}&height=${height}&seed=${seed}&model=flux&nologo=true`;
 
-        // Small delay to show the "connecting" state
+        // Set result immediately to start fetching
         setTimeout(() => {
             setResult(imageUrl);
             setGenerating(false);
             setStatus('');
-        }, 800);
+        }, 500);
     };
 
     const handleImageUpload = (e) => {
