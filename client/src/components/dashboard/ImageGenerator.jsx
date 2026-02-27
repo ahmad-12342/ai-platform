@@ -20,32 +20,37 @@ const ImageGenerator = () => {
     const [generating, setGenerating] = useState(false);
     const [result, setResult] = useState(null);
     const [referenceImage, setReferenceImage] = useState(null);
+    const [status, setStatus] = useState('');
 
     const handleGenerate = async () => {
         if (!prompt && !referenceImage) return;
         setGenerating(true);
         setResult(null);
+        setStatus('Waking up the GPUs...');
 
-        // Advanced AI Synthesis Simulation
         setTimeout(() => {
-            const seed = Math.floor(Math.random() * 999999);
-            const timestamp = Date.now();
+            const seed = Math.floor(Math.random() * 9999999);
             const [width, height] = resolution.split('x');
 
-            // Strict prompt cleaning
-            const cleanPrompt = prompt.trim()
-                .replace(/[^a-zA-Z0-9\s,.-]/g, '') // Keep only letters, numbers, spaces, and basic punctuation
-                .substring(0, 500); // Limit length
+            // Build the final artistic prompt
+            const stylePrompt = selectedStyle ? `${selectedStyle} style, ` : "";
+            const finalPrompt = `${stylePrompt}${prompt}`.trim();
+            const encodedPrompt = encodeURIComponent(finalPrompt);
 
-            const encodedPrompt = encodeURIComponent(cleanPrompt);
+            setStatus('Thinking about your vision...');
 
-            // Using the most stable Flux model endpoint
-            const imageUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=${width}&height=${height}&seed=${seed}&model=flux&nologo=true&t=${timestamp}`;
+            // This is the most stable and modern endpoint for Pollinations Flux
+            const imageUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=${width}&height=${height}&seed=${seed}&model=flux&nologo=true&enhance=true`;
 
-            console.log("Generating URL:", imageUrl);
-            setResult(imageUrl);
-            setGenerating(false);
-        }, 2500); // More realistic delay to allow server preparation
+            console.log("🚀 FINAL AI IMAGE URL:", imageUrl);
+
+            setTimeout(() => {
+                setStatus('Almost there, rendering colors...');
+                setResult(imageUrl);
+                setGenerating(false);
+                setStatus('');
+            }, 1200);
+        }, 800);
     };
 
     const handleImageUpload = (e) => {
@@ -235,7 +240,7 @@ const ImageGenerator = () => {
                                             <Sparkles className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-8 h-8 text-blue-500 animate-pulse" />
                                         </div>
                                         <div>
-                                            <p className="text-xl font-bold mb-2 animate-pulse">Dreaming up your image...</p>
+                                            <p className="text-xl font-bold mb-2 animate-pulse">{status || "Dreaming up your image..."}</p>
                                             <p className="text-gray-500 text-sm">Synthesizing pixels using Neural Vision Core</p>
                                         </div>
                                     </div>
