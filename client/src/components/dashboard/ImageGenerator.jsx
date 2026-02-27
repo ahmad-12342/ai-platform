@@ -24,24 +24,25 @@ const ImageGenerator = () => {
     const handleGenerate = async () => {
         if (!prompt && !referenceImage) return;
         setGenerating(true);
-        setResult(null); // Clear previous result
+        setResult(null);
 
-        // Simulating Precise AI Generation
+        // Advanced AI Synthesis Simulation
         setTimeout(() => {
-            const seed = Math.floor(Math.random() * 999999);
+            const seed = Math.floor(Math.random() * 1000000);
             const [width, height] = resolution.split('x');
 
-            // Using the professional flux model for higher prompt accuracy
-            // Adding more descriptors to the prompt to force the AI to be more precise
-            const enhancedPrompt = `${prompt}${selectedStyle ? `, ${selectedStyle} style` : ''}`;
-            const encodedPrompt = encodeURIComponent(enhancedPrompt);
+            // Build a very high-quality, descriptive prompt for the AI engine
+            const qualityKeywords = "ultra-realistic, 8k, cinematic lighting, highly detailed, masterwork";
+            const finalPrompt = `${prompt}, ${selectedStyle} style, ${qualityKeywords}`;
+            const encodedPrompt = encodeURIComponent(finalPrompt);
 
-            // Correct Pollinations Image Endpoint
-            const imageUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=${width}&height=${height}&seed=${seed}&model=flux&nologo=true`;
+            // Using a more reliable endpoint for direct image embedding
+            const imageUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=${width}&height=${height}&seed=${seed}&model=flux&nologo=true&safe=true`;
 
+            console.log("Generating image with URL:", imageUrl);
             setResult(imageUrl);
             setGenerating(false);
-        }, 2000);
+        }, 1500); // Faster feedback
     };
 
     const handleImageUpload = (e) => {
@@ -183,7 +184,15 @@ const ImageGenerator = () => {
                                 animate={{ opacity: 1, scale: 1 }}
                                 className="w-full h-full"
                             >
-                                <img src={result} alt="Generated" className="w-full h-full object-cover" />
+                                <img
+                                    src={result}
+                                    alt="Generated"
+                                    className="w-full h-full object-cover"
+                                    onError={(e) => {
+                                        e.target.onerror = null;
+                                        e.target.src = "https://via.placeholder.com/1024x1024.png?text=AI+Engine+Busy+-+Try+Again+In+10s";
+                                    }}
+                                />
                                 <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-6">
                                     <div className="text-center">
                                         <p className="text-xl font-bold text-white mb-2">Generation Complete</p>
