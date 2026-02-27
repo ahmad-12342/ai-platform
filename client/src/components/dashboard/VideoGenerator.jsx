@@ -22,113 +22,99 @@ const VideoGenerator = () => {
     const handleGenerate = async () => {
         if (!prompt) return;
         setGenerating(true);
-        // Simulate generation
+        setVideoUrl(null);
+
+        // Simulating Video Generation
         setTimeout(() => {
             setVideoUrl('https://sample-videos.com/video123/mp4/720/big_buck_bunny_720p_1mb.mp4');
             setGenerating(false);
-        }, 4000);
+        }, 5000);
     };
 
     return (
-        <div className="space-y-8">
-            <header>
-                <h1 className="text-4xl font-bold mb-2 flex items-center gap-3">
-                    <Video className="text-purple-500" />
-                    AI Video Studio
-                </h1>
-                <p className="text-gray-400">Create cinematic videos from simple text descriptions.</p>
-            </header>
-
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                <div className="lg:col-span-1 space-y-6">
-                    <div className="glass p-6 rounded-3xl border border-white/5 space-y-6">
-                        <div>
-                            <label className="block text-sm font-medium text-gray-400 mb-3">Aspect Ratio</label>
-                            <div className="space-y-2">
-                                {aspectRatios.map((r) => (
-                                    <button
-                                        key={r.id}
-                                        onClick={() => setAspect(r.id)}
-                                        className={`w-full p-4 rounded-xl border transition-all flex items-center gap-3 ${aspect === r.id
-                                                ? 'border-primary bg-primary/10 text-white'
-                                                : 'border-white/5 hover:border-white/20 text-gray-400'
-                                            }`}
-                                    >
-                                        <span className="text-xl">{r.icon}</span>
-                                        <span className="font-medium">{r.label}</span>
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
-
-                        <div>
-                            <label className="block text-sm font-medium text-gray-400 mb-3">Duration</label>
-                            <div className="flex gap-2">
-                                {durations.map(d => (
-                                    <button
-                                        key={d}
-                                        onClick={() => setDuration(d)}
-                                        className={`flex-1 p-3 rounded-xl border transition-all ${duration === d
-                                                ? 'border-primary bg-primary/10 text-white'
-                                                : 'border-white/5 hover:border-white/20 text-gray-400'
-                                            }`}
-                                    >
-                                        {d}
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
-
-                        <div>
-                            <div className="flex items-center justify-between mb-3">
-                                <label className="text-sm font-medium text-gray-400">Motion Level</label>
-                                <span className="text-primary font-bold">{motionLevel}</span>
-                            </div>
-                            <input
-                                type="range" min="1" max="10"
-                                value={motionLevel}
-                                onChange={(e) => setMotionLevel(parseInt(e.target.value))}
-                                className="w-full accent-primary h-2 bg-white/5 rounded-full appearance-none cursor-pointer"
-                            />
-                            <div className="flex justify-between text-[10px] text-gray-500 mt-2 uppercase tracking-tighter">
-                                <span>Static</span>
-                                <span>Hyper Dynamic</span>
-                            </div>
-                        </div>
-                    </div>
+        <div className="max-w-6xl mx-auto space-y-12">
+            <motion.header
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="text-center"
+            >
+                <div className="inline-flex items-center gap-2 px-3 py-1 bg-purple-500/10 text-purple-400 rounded-full text-xs font-bold uppercase tracking-wider mb-4 border border-purple-500/20">
+                    <Video className="w-3 h-3" />
+                    Temporal Diffusion Engine
                 </div>
+                <h1 className="text-4xl md:text-5xl font-bold mb-4">Director's <span className="text-gradient">Studio</span></h1>
+                <p className="text-gray-400 max-w-xl mx-auto">Turn your stories into cinematic video sequences with high-fidelity motion.</p>
+            </motion.header>
 
-                <div className="lg:col-span-2 space-y-6">
-                    <div className="glass p-6 rounded-3xl border border-white/5 space-y-4">
-                        <textarea
-                            value={prompt}
-                            onChange={(e) => setPrompt(e.target.value)}
-                            placeholder="Describe the action and scene in detail..."
-                            className="w-full h-32 bg-white/5 border border-white/10 rounded-2xl p-4 outline-none focus:border-primary transition-colors resize-none mb-2"
-                        />
-
+            <div className="space-y-12">
+                {/* Modern Prompt Input */}
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.2 }}
+                    className="max-w-4xl mx-auto"
+                >
+                    <div className="glass p-2 rounded-[2rem] border border-white/10 shadow-2xl focus-within:border-primary/50 transition-all flex flex-col md:flex-row items-center gap-2">
+                        <div className="flex-1 flex items-center px-6 w-full">
+                            <Play className="w-6 h-6 text-gray-400 mr-4" />
+                            <input
+                                type="text"
+                                value={prompt}
+                                onChange={(e) => setPrompt(e.target.value)}
+                                onKeyDown={(e) => e.key === 'Enter' && handleGenerate()}
+                                placeholder="A majestic eagle soaring over snow-capped mountains at sunset..."
+                                className="w-full bg-transparent border-none outline-none py-6 text-lg text-white placeholder:text-gray-600"
+                            />
+                        </div>
                         <button
                             onClick={handleGenerate}
                             disabled={generating || !prompt}
-                            className="w-full py-4 rounded-xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 transition-all shadow-lg"
+                            className="w-full md:w-auto px-10 py-5 rounded-[1.5rem] bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 text-white font-bold transition-all flex items-center justify-center gap-3 shadow-lg shadow-purple-500/20 disabled:opacity-50"
                         >
                             {generating ? (
                                 <>
                                     <RefreshCw className="w-5 h-5 animate-spin" />
-                                    Rendering Video Sequence...
+                                    Rendering...
                                 </>
                             ) : (
                                 <>
                                     <Play className="w-5 h-5 fill-current" />
-                                    Generate Video
+                                    Action
                                 </>
                             )}
                         </button>
                     </div>
 
-                    <div className="aspect-video w-full rounded-3xl glass border border-white/10 flex items-center justify-center overflow-hidden relative group">
+                    <div className="flex flex-wrap justify-center gap-3 mt-6">
+                        {aspectRatios.map(r => (
+                            <button
+                                key={r.id}
+                                onClick={() => setAspect(r.id)}
+                                className={`px-4 py-2 rounded-full text-sm font-medium transition-all border ${aspect === r.id
+                                        ? 'bg-purple-500/20 border-purple-500/50 text-purple-400'
+                                        : 'bg-white/5 border-white/5 text-gray-500 hover:border-white/20'
+                                    }`}
+                            >
+                                <span className="mr-2">{r.icon}</span>
+                                {r.label}
+                            </button>
+                        ))}
+                    </div>
+                </motion.div>
+
+                {/* Result Section */}
+                <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className="max-w-4xl mx-auto"
+                >
+                    <div className="relative aspect-video rounded-[2.5rem] overflow-hidden glass border border-white/10 group shadow-2xl">
                         {videoUrl ? (
-                            <>
+                            <motion.div
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                className="w-full h-full"
+                            >
                                 <video
                                     src={videoUrl}
                                     className="w-full h-full object-cover"
@@ -136,36 +122,45 @@ const VideoGenerator = () => {
                                     autoPlay
                                     loop
                                 />
-                                <button className="absolute top-4 right-4 p-3 glass rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
-                                    <Download className="w-5 h-5" />
-                                </button>
-                            </>
-                        ) : (
-                            <div className="text-center space-y-4 text-gray-500">
-                                <Video className="w-20 h-20 mx-auto opacity-20" />
-                                <p>Advanced video rendering will appear here</p>
-                            </div>
-                        )}
-                        {generating && (
-                            <div className="absolute inset-0 glass flex items-center justify-center z-20">
-                                <div className="flex flex-col items-center gap-6 w-1/2">
-                                    <div className="w-full h-2 bg-white/10 rounded-full overflow-hidden">
-                                        <motion.div
-                                            initial={{ width: "0%" }}
-                                            animate={{ width: "100%" }}
-                                            transition={{ duration: 4 }}
-                                            className="h-full bg-gradient-to-r from-purple-500 to-blue-500"
-                                        />
-                                    </div>
-                                    <p className="text-white/60 text-sm font-medium tracking-widest uppercase">Synthesizing Frames...</p>
+                                <div className="absolute top-6 right-6 flex gap-2">
+                                    <button className="p-3 glass text-white rounded-full hover:scale-110 transition-all border border-white/10">
+                                        <Download className="w-5 h-5" />
+                                    </button>
                                 </div>
+                            </motion.div>
+                        ) : (
+                            <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-8">
+                                {generating ? (
+                                    <div className="space-y-8 flex flex-col items-center w-full max-w-sm px-10">
+                                        <div className="w-full h-1 bg-white/10 rounded-full overflow-hidden">
+                                            <motion.div
+                                                initial={{ width: "0%" }}
+                                                animate={{ width: "100%" }}
+                                                transition={{ duration: 5, ease: "linear" }}
+                                                className="h-full bg-gradient-to-r from-purple-500 to-blue-500"
+                                            />
+                                        </div>
+                                        <div className="space-y-2">
+                                            <p className="text-xl font-bold animate-pulse text-purple-400">Synthesizing Temporal Frames</p>
+                                            <p className="text-gray-500 text-xs tracking-widest uppercase">Resolution: 1080p • Duration: {duration}</p>
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <div className="space-y-4 opacity-30">
+                                        <div className="w-24 h-24 mx-auto border-4 border-dashed border-gray-500 rounded-full flex items-center justify-center">
+                                            <Video className="w-10 h-10" />
+                                        </div>
+                                        <p className="text-xl font-medium max-w-xs mx-auto text-gray-400">Your AI cinematic sequence will be rendered here.</p>
+                                    </div>
+                                )}
                             </div>
                         )}
                     </div>
-                </div>
+                </motion.div>
             </div>
         </div>
     );
 };
 
 export default VideoGenerator;
+

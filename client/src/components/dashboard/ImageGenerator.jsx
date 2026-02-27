@@ -23,121 +23,146 @@ const ImageGenerator = () => {
     const handleGenerate = async () => {
         if (!prompt) return;
         setGenerating(true);
-        // Simulate generation
+        setResult(null); // Clear previous result
+
+        // Simulating AI Generation with Unsplash as a result (for demo)
         setTimeout(() => {
-            setResult('https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?auto=format&fit=crop&q=80&w=1000');
+            const seed = Math.floor(Math.random() * 1000);
+            setResult(`https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?auto=format&fit=crop&q=80&w=1000&seed=${seed}`);
             setGenerating(false);
-        }, 2000);
+        }, 3000);
     };
 
     return (
-        <div className="space-y-8">
-            <header>
-                <h1 className="text-4xl font-bold mb-2 flex items-center gap-3">
-                    <ImageIcon className="text-blue-500" />
-                    AI Image Generator
-                </h1>
-                <p className="text-gray-400">Transform your imagination into visual reality.</p>
-            </header>
-
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                {/* Settings Panel */}
-                <div className="lg:col-span-1 space-y-6">
-                    <div className="glass p-6 rounded-3xl border border-white/5 space-y-6">
-                        <div>
-                            <label className="block text-sm font-medium text-gray-400 mb-3">Style Selector</label>
-                            <div className="grid grid-cols-2 gap-2">
-                                {styles.map((style) => (
-                                    <button
-                                        key={style.id}
-                                        onClick={() => setSelectedStyle(style.id)}
-                                        className={`p-3 rounded-xl border transition-all text-sm flex flex-col items-center gap-2 ${selectedStyle === style.id
-                                                ? 'border-primary bg-primary/10 text-white'
-                                                : 'border-white/5 hover:border-white/20 text-gray-400'
-                                            }`}
-                                    >
-                                        <span className="text-2xl">{style.icon}</span>
-                                        {style.label}
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
-
-                        <div>
-                            <label className="block text-sm font-medium text-gray-400 mb-3">Resolution</label>
-                            <select
-                                value={resolution}
-                                onChange={(e) => setResolution(e.target.value)}
-                                className="w-full bg-white/5 border border-white/10 rounded-xl p-3 outline-none focus:border-primary transition-colors"
-                            >
-                                {resolutions.map(r => <option key={r} value={r}>{r}</option>)}
-                            </select>
-                        </div>
-                    </div>
+        <div className="max-w-6xl mx-auto space-y-12">
+            <motion.header
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="text-center"
+            >
+                <div className="inline-flex items-center gap-2 px-3 py-1 bg-blue-500/10 text-blue-400 rounded-full text-xs font-bold uppercase tracking-wider mb-4 border border-blue-500/20">
+                    <Sparkles className="w-3 h-3" />
+                    Neural Vision Engine
                 </div>
+                <h1 className="text-4xl md:text-5xl font-bold mb-4">What will you <span className="text-gradient">imagine</span> today?</h1>
+                <p className="text-gray-400 max-w-xl mx-auto">Enter a prompt and watch the AI bring your vision to life in high resolution.</p>
+            </motion.header>
 
-                {/* Prompt & Preview Panel */}
-                <div className="lg:col-span-2 space-y-6">
-                    <div className="glass p-6 rounded-3xl border border-white/5 space-y-4">
-                        <div className="relative">
-                            <textarea
+            <div className="space-y-12">
+                {/* Modern Prompt Input */}
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.2 }}
+                    className="max-w-4xl mx-auto"
+                >
+                    <div className="glass p-2 rounded-[2rem] border border-white/10 shadow-2xl focus-within:border-primary/50 transition-all flex flex-col md:flex-row items-center gap-2">
+                        <div className="flex-1 flex items-center px-6 w-full">
+                            <ImageIcon className="w-6 h-6 text-gray-400 mr-4" />
+                            <input
+                                type="text"
                                 value={prompt}
                                 onChange={(e) => setPrompt(e.target.value)}
-                                placeholder="Describe what you want to see in detail..."
-                                className="w-full h-32 bg-white/5 border border-white/10 rounded-2xl p-4 outline-none focus:border-primary transition-colors resize-none pr-12"
+                                onKeyDown={(e) => e.key === 'Enter' && handleGenerate()}
+                                placeholder="A cinematic shot of a neon-lit futuristic Tokyo street in the rain..."
+                                className="w-full bg-transparent border-none outline-none py-6 text-lg text-white placeholder:text-gray-600"
                             />
-                            <Wand2 className="absolute top-4 right-4 text-gray-500" />
                         </div>
-
                         <button
                             onClick={handleGenerate}
                             disabled={generating || !prompt}
-                            className="w-full py-4 rounded-xl font-bold bg-primary hover:bg-primary/80 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 transition-all shadow-lg shadow-primary/20"
+                            className="w-full md:w-auto px-10 py-5 rounded-[1.5rem] bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold transition-all flex items-center justify-center gap-3 shadow-lg shadow-blue-500/20 disabled:opacity-50"
                         >
                             {generating ? (
                                 <>
                                     <RefreshCw className="w-5 h-5 animate-spin" />
-                                    Generating Masterpiece...
+                                    Creating...
                                 </>
                             ) : (
                                 <>
-                                    <Sparkles className="w-5 h-5" />
-                                    Generate Image
+                                    <Wand2 className="w-5 h-5" />
+                                    Generate
                                 </>
                             )}
                         </button>
                     </div>
 
-                    {/* Result Display */}
-                    <div className="aspect-square w-full rounded-3xl glass border border-white/10 flex items-center justify-center overflow-hidden relative group">
+                    <div className="flex flex-wrap justify-center gap-3 mt-6">
+                        {styles.map(s => (
+                            <button
+                                key={s.id}
+                                onClick={() => setSelectedStyle(s.id)}
+                                className={`px-4 py-2 rounded-full text-sm font-medium transition-all border ${selectedStyle === s.id
+                                        ? 'bg-blue-500/20 border-blue-500/50 text-blue-400'
+                                        : 'bg-white/5 border-white/5 text-gray-500 hover:border-white/20'
+                                    }`}
+                            >
+                                <span className="mr-2">{s.icon}</span>
+                                {s.label}
+                            </button>
+                        ))}
+                    </div>
+                </motion.div>
+
+                {/* Result Section */}
+                <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className="max-w-4xl mx-auto"
+                >
+                    <div className="relative aspect-video rounded-[2.5rem] overflow-hidden glass border border-white/10 group shadow-2xl">
                         {result ? (
-                            <>
-                                <img src={result} alt="Generation result" className="w-full h-full object-cover" />
-                                <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-4">
-                                    <button className="p-4 bg-white text-black rounded-full hover:scale-110 transition-transform shadow-xl">
-                                        <Download className="w-6 h-6" />
-                                    </button>
+                            <motion.div
+                                initial={{ opacity: 0, scale: 1.1 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                className="w-full h-full"
+                            >
+                                <img src={result} alt="Generated" className="w-full h-full object-cover" />
+                                <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-6">
+                                    <div className="text-center">
+                                        <p className="text-xl font-bold text-white mb-2">Generation Complete</p>
+                                        <p className="text-gray-300 text-sm">Resolution: {resolution}</p>
+                                    </div>
+                                    <div className="flex gap-4">
+                                        <button className="flex items-center gap-2 px-6 py-3 bg-white text-black rounded-full font-bold hover:scale-105 transition-transform">
+                                            <Download className="w-5 h-5" />
+                                            Download 4K
+                                        </button>
+                                        <button className="flex items-center gap-2 px-6 py-3 glass text-white rounded-full font-bold hover:scale-105 transition-transform border border-white/20">
+                                            <RefreshCw className="w-5 h-5" />
+                                            Regenerate
+                                        </button>
+                                    </div>
                                 </div>
-                            </>
+                            </motion.div>
                         ) : (
-                            <div className="text-center space-y-4 text-gray-500">
-                                <ImageIcon className="w-20 h-20 mx-auto opacity-20" />
-                                <p>Your creation will appear here</p>
-                            </div>
-                        )}
-                        {generating && (
-                            <div className="absolute inset-0 glass flex items-center justify-center">
-                                <div className="flex flex-col items-center gap-4">
-                                    <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
-                                    <p className="text-primary font-medium animate-pulse">Diffusing Pixels...</p>
-                                </div>
+                            <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-8">
+                                {generating ? (
+                                    <div className="space-y-6 flex flex-col items-center">
+                                        <div className="relative w-24 h-24">
+                                            <div className="absolute inset-0 border-4 border-blue-500/20 rounded-full"></div>
+                                            <div className="absolute inset-0 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                                            <Sparkles className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-8 h-8 text-blue-500 animate-pulse" />
+                                        </div>
+                                        <div>
+                                            <p className="text-xl font-bold mb-2 animate-pulse">Dreaming up your image...</p>
+                                            <p className="text-gray-500 text-sm">Synthesizing pixels using Neural Vision Core</p>
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <div className="space-y-4 opacity-30">
+                                        <ImageIcon className="w-24 h-24 mx-auto" />
+                                        <p className="text-xl font-medium max-w-xs mx-auto">Your masterpiece will manifest here after you enter a prompt.</p>
+                                    </div>
+                                )}
                             </div>
                         )}
                     </div>
-                </div>
+                </motion.div>
             </div>
         </div>
     );
 };
 
 export default ImageGenerator;
+

@@ -20,10 +20,11 @@ const ContentWriter = () => {
     const handleGenerate = async () => {
         if (!topic) return;
         setGenerating(true);
+        setResult('');
         setTimeout(() => {
-            setResult(`## The Future of AI in Content Creation\n\nArtificial Intelligence is not just a tool; it's a co-creator... (Generated content for ${topic})`);
+            setResult(`## The Future of AI in Content Creation\n\nArtificial Intelligence is not just a tool; it's a co-creator that amplifies human potential. In the next decade, we'll see a shift from simple automation to deep collaboration between human intuition and machine efficiency...\n\n### Key Takeaways:\n1. Speed of iteration will increase 10x.\n2. Multimodal generation will become standard.\n3. Content personalization will reach individual level scale.\n\nGenerated specifically for: ${topic}`);
             setGenerating(false);
-        }, 2500);
+        }, 3000);
     };
 
     const copyToClipboard = () => {
@@ -33,99 +34,135 @@ const ContentWriter = () => {
     };
 
     return (
-        <div className="space-y-8">
-            <header>
-                <h1 className="text-4xl font-bold mb-2 flex items-center gap-3">
-                    <Sparkles className="text-orange-500" />
-                    AI Content Writer
-                </h1>
-                <p className="text-gray-400">Generate high-quality written content for any purpose instantly.</p>
-            </header>
+        <div className="max-w-6xl mx-auto space-y-12">
+            <motion.header
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="text-center"
+            >
+                <div className="inline-flex items-center gap-2 px-3 py-1 bg-orange-500/10 text-orange-400 rounded-full text-xs font-bold uppercase tracking-wider mb-4 border border-orange-500/20">
+                    <Sparkles className="w-3 h-3" />
+                    Neural Content Engine
+                </div>
+                <h1 className="text-4xl md:text-5xl font-bold mb-4">AI <span className="text-gradient">Content</span> Writer</h1>
+                <p className="text-gray-400 max-w-xl mx-auto">Generate high-quality blogs, scripts, and captions in seconds.</p>
+            </motion.header>
 
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-                <div className="lg:col-span-4 space-y-6">
-                    <div className="glass p-6 rounded-3xl border border-white/5 space-y-6">
-                        <div>
-                            <label className="block text-sm font-medium text-gray-400 mb-4">What are we writing?</label>
-                            <div className="grid grid-cols-1 gap-2">
-                                {types.map((type) => (
-                                    <button
-                                        key={type.id}
-                                        onClick={() => setActiveType(type.id)}
-                                        className={`p-4 rounded-xl border transition-all flex items-center gap-3 ${activeType === type.id
-                                                ? 'border-primary bg-primary/10 text-white'
-                                                : 'border-white/5 hover:border-white/20 text-gray-400'
-                                            }`}
-                                    >
-                                        <type.icon className="w-5 h-5" />
-                                        <span className="font-medium">{type.label}</span>
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
-
-                        <div>
-                            <label className="block text-sm font-medium text-gray-400 mb-3">Topic or Prompt</label>
-                            <textarea
+            <div className="space-y-12">
+                {/* Modern Prompt Input */}
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.2 }}
+                    className="max-w-4xl mx-auto"
+                >
+                    <div className="glass p-2 rounded-[2rem] border border-white/10 shadow-2xl focus-within:border-primary/50 transition-all flex flex-col md:flex-row items-center gap-2">
+                        <div className="flex-1 flex items-center px-6 w-full">
+                            <Hash className="w-6 h-6 text-gray-400 mr-4" />
+                            <input
+                                type="text"
                                 value={topic}
                                 onChange={(e) => setTopic(e.target.value)}
-                                placeholder="Ex: Write a technical blog about React 19 features..."
-                                className="w-full h-32 bg-white/5 border border-white/10 rounded-xl p-4 outline-none focus:border-primary transition-colors resize-none mb-4"
+                                onKeyDown={(e) => e.key === 'Enter' && handleGenerate()}
+                                placeholder="Topic for your content (e.g. Benefits of Web3)..."
+                                className="w-full bg-transparent border-none outline-none py-6 text-lg text-white placeholder:text-gray-600"
                             />
-                            <button
-                                onClick={handleGenerate}
-                                disabled={generating || !topic}
-                                className="w-full py-4 rounded-xl font-bold bg-primary hover:bg-primary/80 disabled:opacity-50 flex items-center justify-center gap-2"
-                            >
-                                {generating ? <Wand2 className="w-5 h-5 animate-spin" /> : <Sparkles className="w-5 h-5" />}
-                                {generating ? 'Writing...' : 'Generate Content'}
-                            </button>
                         </div>
+                        <button
+                            onClick={handleGenerate}
+                            disabled={generating || !topic}
+                            className="w-full md:w-auto px-10 py-5 rounded-[1.5rem] bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-500 hover:to-red-500 text-white font-bold transition-all flex items-center justify-center gap-3 shadow-lg shadow-orange-500/20 disabled:opacity-50"
+                        >
+                            {generating ? (
+                                <>
+                                    <RefreshCw className="w-5 h-5 animate-spin" />
+                                    Writing...
+                                </>
+                            ) : (
+                                <>
+                                    <Wand2 className="w-5 h-5" />
+                                    Compose
+                                </>
+                            )}
+                        </button>
                     </div>
-                </div>
 
-                <div className="lg:col-span-8">
-                    <div className="glass p-8 rounded-[2rem] border border-white/10 min-h-[600px] relative flex flex-col">
+                    <div className="flex flex-wrap justify-center gap-3 mt-6">
+                        {types.map(t => (
+                            <button
+                                key={t.id}
+                                onClick={() => setActiveType(t.id)}
+                                className={`px-5 py-2.5 rounded-full text-sm font-medium transition-all border flex items-center gap-2 ${activeType === t.id
+                                        ? 'bg-orange-500/20 border-orange-500/50 text-orange-400'
+                                        : 'bg-white/5 border-white/5 text-gray-500 hover:border-white/20'
+                                    }`}
+                            >
+                                <t.icon className="w-4 h-4" />
+                                {t.label}
+                            </button>
+                        ))}
+                    </div>
+                </motion.div>
+
+                {/* Result Section */}
+                <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className="max-w-4xl mx-auto"
+                >
+                    <div className="glass p-10 rounded-[2.5rem] border border-white/10 relative min-h-[400px] flex flex-col shadow-2xl overflow-hidden">
                         {result ? (
-                            <>
-                                <div className="flex justify-between items-center mb-6 pb-6 border-b border-white/5">
-                                    <span className="text-sm font-bold text-gray-500 uppercase tracking-widest">AI Result</span>
+                            <motion.div
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                className="space-y-6"
+                            >
+                                <div className="flex justify-between items-center pb-6 border-b border-white/5">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-2 h-2 rounded-full bg-green-500"></div>
+                                        <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">High Quality Output</span>
+                                    </div>
                                     <button
                                         onClick={copyToClipboard}
-                                        className="flex items-center gap-2 text-sm text-gray-400 hover:text-white transition-colors"
+                                        className="flex items-center gap-2 px-4 py-2 glass rounded-lg text-sm text-gray-400 hover:text-white transition-all border border-white/5"
                                     >
                                         {copied ? <Check className="w-4 h-4 text-green-500" /> : <Copy className="w-4 h-4" />}
                                         {copied ? 'Copied' : 'Copy Text'}
                                     </button>
                                 </div>
-                                <div className="prose prose-invert max-w-none text-gray-300 whitespace-pre-wrap flex-1">
+                                <div className="prose prose-invert max-w-none text-gray-300 whitespace-pre-wrap leading-relaxed">
                                     {result}
                                 </div>
-                            </>
+                            </motion.div>
                         ) : (
-                            <div className="flex-1 flex flex-col items-center justify-center text-gray-500 gap-4">
-                                <Layout className="w-16 h-16 opacity-10" />
-                                <p>Your generated content will appear here</p>
+                            <div className="flex-1 flex flex-col items-center justify-center text-gray-500 gap-6">
+                                {generating ? (
+                                    <div className="text-center space-y-4">
+                                        <div className="flex gap-2 justify-center">
+                                            <div className="w-3 h-3 bg-orange-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                                            <div className="w-3 h-3 bg-orange-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                                            <div className="w-3 h-3 bg-orange-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                                        </div>
+                                        <p className="text-lg font-bold text-orange-400 animate-pulse tracking-wide uppercase">AI is analyzing context</p>
+                                    </div>
+                                ) : (
+                                    <div className="text-center space-y-4 opacity-30">
+                                        <Layout className="w-20 h-20 mx-auto" />
+                                        <p className="text-lg font-medium max-w-xs mx-auto">Your high-quality AI generated content will appear here.</p>
+                                    </div>
+                                )}
                             </div>
                         )}
 
-                        {generating && (
-                            <div className="absolute inset-0 glass rounded-[2rem] flex items-center justify-center">
-                                <div className="flex flex-col items-center gap-4">
-                                    <div className="flex gap-2">
-                                        <div className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                                        <div className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                                        <div className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
-                                    </div>
-                                    <p className="font-bold text-primary animate-pulse uppercase tracking-[0.2em] text-xs">AI is thinking</p>
-                                </div>
-                            </div>
-                        )}
+                        {/* Background Decoration */}
+                        <div className="absolute -bottom-20 -right-20 w-64 h-64 bg-orange-500/5 blur-[100px] rounded-full pointer-events-none" />
                     </div>
-                </div>
+                </motion.div>
             </div>
         </div>
     );
 };
 
+import { RefreshCw } from 'lucide-react';
 export default ContentWriter;
+
