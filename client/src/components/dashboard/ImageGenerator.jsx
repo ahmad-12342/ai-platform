@@ -24,40 +24,25 @@ const ImageGenerator = () => {
     const [imageLoading, setImageLoading] = useState(false);
     const [loadingTimeoutId, setLoadingTimeoutId] = useState(null);
 
-    const handleGenerate = async () => {
+    const handleGenerate = () => {
         if (!prompt.trim() && !referenceImage) return;
 
-        // Clear any existing timeout
-        if (loadingTimeoutId) clearTimeout(loadingTimeoutId);
-
+        console.log("Starting generation...");
         setGenerating(true);
         setResult(null);
         setImageLoading(true);
 
-        // Safety timeout: 15 seconds to force-clear loading state
-        const timeoutId = setTimeout(() => {
-            setImageLoading(false);
-        }, 15000);
-        setLoadingTimeoutId(timeoutId);
-
-        // Random parameters for uniqueness
-        const seed = Math.floor(Math.random() * 99999999);
+        const seed = Math.floor(Math.random() * 10000000);
         const [w, h] = resolution.split('x');
-
-        // Preparing a very clean prompt
-        const userPrompt = prompt.trim() || (referenceImage ? "variation" : "masterpiece");
+        const userPrompt = prompt.trim() || 'beautiful scenery';
         const finalPrompt = encodeURIComponent(`${selectedStyle} style, ${userPrompt}`);
 
-        // THE MOST DIRECT IMAGE URL
-        const url = `https://image.pollinations.ai/prompt/${finalPrompt}?width=${w}&height=${h}&seed=${seed}&nologo=true&model=flux`;
+        // Ultimate stable URL with cache busting
+        const url = `https://image.pollinations.ai/prompt/${finalPrompt}?width=${w}&height=${h}&seed=${seed}&nologo=true`;
 
-        console.log("New Image URL:", url);
-
-        // Force result update
-        setTimeout(() => {
-            setResult(url);
-            setGenerating(false);
-        }, 100);
+        // Immediately show loading and result container
+        setResult(url);
+        setGenerating(false);
     };
 
     const handleImageUpload = (e) => {
@@ -198,15 +183,9 @@ const ImageGenerator = () => {
                                     key={result}
                                     src={result}
                                     alt="Result"
-                                    className="w-full h-full object-contain relative z-10"
-                                    onLoad={() => {
-                                        setImageLoading(false);
-                                        if (loadingTimeoutId) clearTimeout(loadingTimeoutId);
-                                    }}
-                                    onError={() => {
-                                        setImageLoading(false);
-                                        if (loadingTimeoutId) clearTimeout(loadingTimeoutId);
-                                    }}
+                                    className="w-full h-full object-contain relative z-10 block"
+                                    onLoad={() => setImageLoading(false)}
+                                    onError={() => setImageLoading(false)}
                                 />
 
                                 {/* HIGH VISIBILITY BUTTONS */}
