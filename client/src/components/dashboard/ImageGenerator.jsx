@@ -38,7 +38,7 @@ const ImageGenerator = () => {
         const finalPrompt = encodeURIComponent(`${selectedStyle} style, ${userPrompt}`);
 
         // Ultimate stable URL with cache busting
-        const url = `https://image.pollinations.ai/prompt/${finalPrompt}?width=${w}&height=${h}&seed=${seed}&nologo=true`;
+        const url = `https://pollinations.ai/p/${finalPrompt}?width=${w}&height=${h}&seed=${seed}&nologo=true`;
 
         // Immediately show loading and result container
         setResult(url);
