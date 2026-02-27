@@ -192,57 +192,56 @@ const ImageGenerator = () => {
                             <motion.div
                                 initial={{ opacity: 0 }}
                                 animate={{ opacity: 1 }}
-                                className="w-full h-full relative bg-gray-900"
+                                className="w-full h-full relative"
                             >
-                                {imageLoading && (
-                                    <div className="absolute inset-0 z-30 flex flex-col items-center justify-center bg-black/90 transition-all">
-                                        <div className="w-12 h-12 border-2 border-blue-500 border-t-transparent rounded-full animate-spin mb-4"></div>
-                                        <p className="text-white text-[10px] font-bold tracking-widest animate-pulse">GENERATING PIXELS...</p>
-                                    </div>
-                                )}
                                 <img
                                     key={result}
                                     src={result}
                                     alt="Result"
-                                    className="w-full h-full object-contain relative z-10 block"
+                                    className="w-full h-full object-contain relative z-10"
                                     onLoad={() => {
                                         setImageLoading(false);
-                                        if (loadingTimeoutId) {
-                                            clearTimeout(loadingTimeoutId);
-                                            setLoadingTimeoutId(null);
-                                        }
+                                        if (loadingTimeoutId) clearTimeout(loadingTimeoutId);
                                     }}
                                     onError={() => {
                                         setImageLoading(false);
-                                        if (loadingTimeoutId) {
-                                            clearTimeout(loadingTimeoutId);
-                                            setLoadingTimeoutId(null);
-                                        }
+                                        if (loadingTimeoutId) clearTimeout(loadingTimeoutId);
                                     }}
                                 />
-                                <div className="absolute top-6 left-6 z-40 flex flex-wrap gap-3">
-                                    <a
-                                        href={result}
-                                        target="_blank"
-                                        rel="noreferrer"
-                                        className="bg-primary hover:bg-primary/80 text-white px-8 py-3 rounded-full text-xs font-black uppercase shadow-[0_10px_30px_rgba(59,130,246,0.3)] transition-all flex items-center gap-2"
-                                    >
-                                        <Sparkles className="w-4 h-4" />
-                                        Open Full Quality Image
-                                    </a>
+
+                                {/* HIGH VISIBILITY BUTTONS */}
+                                <div className="absolute inset-0 z-40 flex flex-col items-center justify-center pointer-events-none">
+                                    {imageLoading && (
+                                        <div className="bg-black/80 p-8 rounded-[2rem] border border-white/10 backdrop-blur-xl flex flex-col items-center pointer-events-auto shadow-2xl">
+                                            <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mb-6"></div>
+                                            <p className="text-white font-bold mb-6 animate-pulse">GENERATING YOUR MASTERPIECE...</p>
+                                            <a
+                                                href={result}
+                                                target="_blank"
+                                                rel="noreferrer"
+                                                className="bg-blue-600 hover:bg-blue-500 text-white px-8 py-4 rounded-full font-black uppercase text-sm shadow-[0_0_30px_rgba(37,99,235,0.4)] transition-all flex items-center gap-3 scale-110"
+                                            >
+                                                <Sparkles className="w-5 h-5" />
+                                                See Result Immediately
+                                            </a>
+                                            <p className="text-gray-500 text-[10px] mt-4 uppercase tracking-tighter">Click if dashboard stays empty</p>
+                                        </div>
+                                    )}
+                                </div>
+
+                                <div className="absolute bottom-6 right-6 z-50 flex gap-3">
                                     <button
                                         onClick={handleDownload}
-                                        className="bg-white/10 hover:bg-white/20 text-white px-6 py-2 rounded-full text-[12px] font-bold shadow-xl transition-all flex items-center gap-2"
+                                        className="bg-white/10 hover:bg-white/20 text-white p-4 rounded-full backdrop-blur-md border border-white/10 transition-all"
                                     >
-                                        <Download className="w-4 h-4" />
-                                        Download
+                                        <Download className="w-5 h-5" />
                                     </button>
                                     <button
-                                        onClick={handleRegenerate}
-                                        className="bg-white/10 hover:bg-white/20 text-white px-6 py-2 rounded-full text-[12px] font-bold shadow-xl transition-all flex items-center gap-2"
+                                        onClick={() => handleGenerate()}
+                                        className="bg-white text-black px-6 py-4 rounded-full font-bold shadow-xl hover:scale-105 transition-all flex items-center gap-2"
                                     >
-                                        <RefreshCw className="w-4 h-4" />
-                                        Regenerate
+                                        <RefreshCw className="w-5 h-5" />
+                                        Re-Imagine
                                     </button>
                                 </div>
                             </motion.div>
