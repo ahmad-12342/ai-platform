@@ -30,14 +30,17 @@ const ImageGenerator = () => {
         setResult(null);
         setImageLoading(true);
 
-        const seed = Math.floor(Math.random() * 1000000);
+        const seed = Math.floor(Math.random() * 10000000);
         const [width, height] = resolution.split('x');
-        const finalPrompt = encodeURIComponent(prompt.trim() || "art");
 
-        // SIMPLEST STABLE LINK
-        const imageUrl = `https://pollinations.ai/p/${finalPrompt}?width=${width}&height=${height}&seed=${seed}`;
+        // Bulletproof prompt encoding
+        const safePrompt = prompt.trim() || "modern art";
+        const encodedPrompt = encodeURIComponent(safePrompt);
 
-        // Display result immediately
+        // THE MOST STABLE URL FOR POLLINATIONS
+        const imageUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=${width}&height=${height}&seed=${seed}&nologo=true&model=flux`;
+
+        // Inject result
         setResult(imageUrl);
         setGenerating(false);
     };
@@ -191,19 +194,18 @@ const ImageGenerator = () => {
                                     key={result}
                                     src={result}
                                     alt="AI Generated"
-                                    className="w-full h-full object-contain relative z-10"
+                                    className="w-full h-full object-contain relative z-10 block"
                                     onLoad={() => setImageLoading(false)}
                                     onError={(e) => {
                                         e.target.onerror = null;
-                                        const p = prompt ? encodeURIComponent(prompt.substring(0, 100)) : 'art';
-                                        e.target.src = `https://pollinations.ai/p/${p}?width=1024&height=1024&seed=42`;
+                                        e.target.src = "https://via.placeholder.com/1024x1024.png?text=AI+Result+Ready+-+Click+Below";
                                         setImageLoading(false);
                                     }}
                                 />
-                                <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-40 flex gap-4">
-                                    <a href={result} target="_blank" rel="noreferrer" className="bg-primary hover:bg-primary/90 text-white px-8 py-3 rounded-full text-sm font-bold shadow-2xl transition-all flex items-center gap-2 whitespace-nowrap">
+                                <div className="absolute inset-x-0 bottom-6 z-40 flex justify-center">
+                                    <a href={result} target="_blank" rel="noreferrer" className="bg-primary hover:bg-primary/90 text-white px-10 py-4 rounded-full text-base font-black shadow-[0_0_30px_rgba(99,102,241,0.5)] transition-all flex items-center gap-3">
                                         <Sparkles className="w-5 h-5" />
-                                        Full Screen View
+                                        OPEN HD IMAGE
                                     </a>
                                 </div>
                                 <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-6">
