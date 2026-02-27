@@ -22,29 +22,42 @@ const ImageGenerator = () => {
     const [referenceImage, setReferenceImage] = useState(null);
     const [status, setStatus] = useState('');
     const [imageLoading, setImageLoading] = useState(false);
+    const [loadingTimeoutId, setLoadingTimeoutId] = useState(null);
 
     const handleGenerate = async () => {
         if (!prompt.trim() && !referenceImage) return;
 
-        console.log("Starting generation...");
+        // Clear any existing timeout
+        if (loadingTimeoutId) clearTimeout(loadingTimeoutId);
+
         setGenerating(true);
         setResult(null);
         setImageLoading(true);
 
-        // Random parameters
-        const seed = Math.floor(Math.random() * 9999999);
+        // Safety timeout: 15 seconds to force-clear loading state
+        const timeoutId = setTimeout(() => {
+            setImageLoading(false);
+        }, 15000);
+        setLoadingTimeoutId(timeoutId);
+
+        // Random parameters for uniqueness
+        const seed = Math.floor(Math.random() * 99999999);
         const [w, h] = resolution.split('x');
 
-        // Build style-aware prompt
-        const finalPrompt = `${selectedStyle} style, ${prompt.trim() || "art"}`;
-        const encoded = encodeURIComponent(finalPrompt);
+        // Preparing a very clean prompt
+        const userPrompt = prompt.trim() || (referenceImage ? "variation" : "masterpiece");
+        const finalPrompt = encodeURIComponent(`${selectedStyle} style, ${userPrompt}`);
 
-        // Fast URL
-        const url = `https://pollinations.ai/p/${encoded}?width=${w}&height=${h}&seed=${seed}&model=flux&nologo=true`;
+        // THE MOST DIRECT IMAGE URL
+        const url = `https://image.pollinations.ai/prompt/${finalPrompt}?width=${w}&height=${h}&seed=${seed}&nologo=true&model=flux`;
 
-        // Immediate update to UI
-        setResult(url);
-        setGenerating(false);
+        console.log("New Image URL:", url);
+
+        // Force result update
+        setTimeout(() => {
+            setResult(url);
+            setGenerating(false);
+        }, 100);
     };
 
     const handleImageUpload = (e) => {
@@ -73,7 +86,6 @@ const ImageGenerator = () => {
             window.URL.revokeObjectURL(url);
         } catch (error) {
             console.error('Download failed:', error);
-            // Fallback: open in new tab
             window.open(result, '_blank');
         }
     };
@@ -93,7 +105,7 @@ const ImageGenerator = () => {
                     <Sparkles className="w-3 h-3" />
                     Neural Vision Engine
                 </div>
-                <h1 className="text-4xl md:text-5xl font-bold mb-4">What will you <span className="text-gradient">imagine</span> today?</h1>
+                <h1 className="text-4xl md:text-5xl font-bold mb-4 text-white">What will you <span className="text-gradient">imagine</span> today?</h1>
                 <p className="text-gray-400 max-w-xl mx-auto">Enter a prompt and watch the AI bring your vision to life in high resolution.</p>
             </motion.header>
 
@@ -174,11 +186,7 @@ const ImageGenerator = () => {
                 </motion.div>
 
                 {/* Result Section */}
-                <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    className="max-w-4xl mx-auto"
-                >
+                <div className="max-w-4xl mx-auto">
                     <div className="relative aspect-video rounded-[2.5rem] overflow-hidden glass border border-white/10 group shadow-2xl">
                         {result ? (
                             <motion.div
@@ -188,47 +196,54 @@ const ImageGenerator = () => {
                             >
                                 {imageLoading && (
                                     <div className="absolute inset-0 z-30 flex flex-col items-center justify-center bg-black/90 transition-all">
-                                        <div className="w-12 h-12 border-2 border-primary border-t-transparent rounded-full animate-spin mb-4"></div>
-                                        <p className="text-white font-bold animate-pulse uppercase tracking-[0.2em] text-[10px]">AI Rendering...</p>
+                                        <div className="w-12 h-12 border-2 border-blue-500 border-t-transparent rounded-full animate-spin mb-4"></div>
+                                        <p className="text-white text-[10px] font-bold tracking-widest animate-pulse">GENERATING PIXELS...</p>
                                     </div>
                                 )}
                                 <img
                                     key={result}
                                     src={result}
                                     alt="Result"
-                                    className="w-full h-full object-contain relative z-10"
-                                    onLoad={() => setImageLoading(false)}
+                                    className="w-full h-full object-contain relative z-10 block"
+                                    onLoad={() => {
+                                        setImageLoading(false);
+                                        if (loadingTimeoutId) {
+                                            clearTimeout(loadingTimeoutId);
+                                            setLoadingTimeoutId(null);
+                                        }
+                                    }}
                                     onError={() => {
                                         setImageLoading(false);
+                                        if (loadingTimeoutId) {
+                                            clearTimeout(loadingTimeoutId);
+                                            setLoadingTimeoutId(null);
+                                        }
                                     }}
                                 />
-                                <div className="absolute top-6 left-6 z-40">
-                                    <a href={result} target="_blank" rel="noreferrer" className="bg-white text-black px-6 py-2.5 rounded-full text-[11px] font-black uppercase shadow-2xl hover:bg-primary hover:text-white transition-all flex items-center gap-2">
+                                <div className="absolute top-6 left-6 z-40 flex flex-wrap gap-3">
+                                    <a
+                                        href={result}
+                                        target="_blank"
+                                        rel="noreferrer"
+                                        className="bg-primary hover:bg-primary/80 text-white px-8 py-3 rounded-full text-xs font-black uppercase shadow-[0_10px_30px_rgba(59,130,246,0.3)] transition-all flex items-center gap-2"
+                                    >
                                         <Sparkles className="w-4 h-4" />
-                                        Manual View Link
+                                        Open Full Quality Image
                                     </a>
-                                </div>
-                                <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-6">
-                                    <div className="text-center">
-                                        <p className="text-xl font-bold text-white mb-2">Generation Complete</p>
-                                        <p className="text-gray-300 text-sm">Resolution: {resolution}</p>
-                                    </div>
-                                    <div className="flex gap-4">
-                                        <button
-                                            onClick={handleDownload}
-                                            className="flex items-center gap-2 px-6 py-3 bg-white text-black rounded-full font-bold hover:scale-105 transition-transform"
-                                        >
-                                            <Download className="w-5 h-5" />
-                                            Download 4K
-                                        </button>
-                                        <button
-                                            onClick={handleRegenerate}
-                                            className="flex items-center gap-2 px-6 py-3 glass text-white rounded-full font-bold hover:scale-105 transition-transform border border-white/20"
-                                        >
-                                            <RefreshCw className="w-5 h-5" />
-                                            Regenerate
-                                        </button>
-                                    </div>
+                                    <button
+                                        onClick={handleDownload}
+                                        className="bg-white/10 hover:bg-white/20 text-white px-6 py-2 rounded-full text-[12px] font-bold shadow-xl transition-all flex items-center gap-2"
+                                    >
+                                        <Download className="w-4 h-4" />
+                                        Download
+                                    </button>
+                                    <button
+                                        onClick={handleRegenerate}
+                                        className="bg-white/10 hover:bg-white/20 text-white px-6 py-2 rounded-full text-[12px] font-bold shadow-xl transition-all flex items-center gap-2"
+                                    >
+                                        <RefreshCw className="w-4 h-4" />
+                                        Regenerate
+                                    </button>
                                 </div>
                             </motion.div>
                         ) : (
@@ -241,20 +256,20 @@ const ImageGenerator = () => {
                                             <Sparkles className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-8 h-8 text-blue-500 animate-pulse" />
                                         </div>
                                         <div>
-                                            <p className="text-xl font-bold mb-2 animate-pulse">{status || "Dreaming up your image..."}</p>
+                                            <p className="text-xl font-bold mb-2 animate-pulse text-white">Dreaming up your image...</p>
                                             <p className="text-gray-500 text-sm">Synthesizing pixels using Neural Vision Core</p>
                                         </div>
                                     </div>
                                 ) : (
                                     <div className="space-y-4 opacity-30">
-                                        <ImageIcon className="w-24 h-24 mx-auto" />
-                                        <p className="text-xl font-medium max-w-xs mx-auto">Your masterpiece will manifest here after you enter a prompt.</p>
+                                        <ImageIcon className="w-24 h-24 mx-auto text-gray-400" />
+                                        <p className="text-xl font-medium max-w-xs mx-auto text-gray-400">Your masterpiece will manifest here after you enter a prompt.</p>
                                     </div>
                                 )}
                             </div>
                         )}
                     </div>
-                </motion.div>
+                </div>
             </div>
         </div>
     );
