@@ -1,7 +1,7 @@
 "use client";
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Video, Download, Play, RefreshCw, Slider, Fullscreen } from 'lucide-react';
+import { Video, Download, Play, RefreshCw, Sliders, Maximize } from 'lucide-react';
 
 const aspectRatios = [
     { id: '16:9', label: '16:9 Landscape', icon: '📺' },
@@ -91,8 +91,8 @@ const VideoGenerator = () => {
                                 key={r.id}
                                 onClick={() => setAspect(r.id)}
                                 className={`px-4 py-2 rounded-full text-sm font-medium transition-all border ${aspect === r.id
-                                        ? 'bg-purple-500/20 border-purple-500/50 text-purple-400'
-                                        : 'bg-white/5 border-white/5 text-gray-500 hover:border-white/20'
+                                    ? 'bg-purple-500/20 border-purple-500/50 text-purple-400'
+                                    : 'bg-white/5 border-white/5 text-gray-500 hover:border-white/20'
                                     }`}
                             >
                                 <span className="mr-2">{r.icon}</span>

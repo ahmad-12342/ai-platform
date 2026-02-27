@@ -1,7 +1,7 @@
 "use client";
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Sparkles, Copy, Check, Hash, Code, Layout, MessageSquare, Wand2 } from 'lucide-react';
+import { Sparkles, Copy, Check, Hash, Code, Layout, MessageSquare, Wand2, RefreshCw } from 'lucide-react';
 
 const types = [
     { id: 'blog', label: 'Blog Post', icon: Layout },
@@ -93,8 +93,8 @@ const ContentWriter = () => {
                                 key={t.id}
                                 onClick={() => setActiveType(t.id)}
                                 className={`px-5 py-2.5 rounded-full text-sm font-medium transition-all border flex items-center gap-2 ${activeType === t.id
-                                        ? 'bg-orange-500/20 border-orange-500/50 text-orange-400'
-                                        : 'bg-white/5 border-white/5 text-gray-500 hover:border-white/20'
+                                    ? 'bg-orange-500/20 border-orange-500/50 text-orange-400'
+                                    : 'bg-white/5 border-white/5 text-gray-500 hover:border-white/20'
                                     }`}
                             >
                                 <t.icon className="w-4 h-4" />
@@ -163,6 +163,4 @@ const ContentWriter = () => {
     );
 };
 
-import { RefreshCw } from 'lucide-react';
 export default ContentWriter;
-
