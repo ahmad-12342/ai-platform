@@ -24,25 +24,42 @@ const ImageGenerator = () => {
     const [imageLoading, setImageLoading] = useState(false);
     const [loadingTimeoutId, setLoadingTimeoutId] = useState(null);
 
-    const handleGenerate = () => {
+    const handleGenerate = async () => {
         if (!prompt.trim() && !referenceImage) return;
 
-        console.log("Starting generation...");
+        console.log("Generating with OpenAI DALL-E...");
         setGenerating(true);
         setResult(null);
         setImageLoading(true);
 
-        const seed = Math.floor(Math.random() * 10000000);
-        const [w, h] = resolution.split('x');
-        const userPrompt = prompt.trim() || 'beautiful scenery';
-        const finalPrompt = encodeURIComponent(`${selectedStyle} style, ${userPrompt}`);
+        try {
+            const userPrompt = prompt.trim() || 'beautiful scenery';
+            const finalPrompt = `${selectedStyle} style, ${userPrompt}, intricate, 4k resolution`;
 
-        // Ultimate stable URL with cache busting
-        const url = `https://pollinations.ai/p/${finalPrompt}?width=${w}&height=${h}&seed=${seed}&nologo=true`;
+            const response = await fetch('/api/generate-image', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    prompt: finalPrompt,
+                    resolution: resolution
+                })
+            });
 
-        // Immediately show loading and result container
-        setResult(url);
-        setGenerating(false);
+            const data = await response.json();
+
+            if (!response.ok) {
+                console.error("OpenAI error string:", data.error);
+                throw new Error(data.error || 'Failed to generate');
+            }
+
+            setResult(data.url);
+        } catch (error) {
+            console.error("Image generation failed:", error);
+            alert("Oops! OpenAI failed to imagine that: " + error.message);
+            setImageLoading(false);
+        } finally {
+            setGenerating(false);
+        }
     };
 
     const handleImageUpload = (e) => {
