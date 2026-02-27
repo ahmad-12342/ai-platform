@@ -10,6 +10,23 @@ const firebaseConfig = {
     appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID
 };
 
-const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
-export const auth = getAuth(app);
+// Only initialize Firebase if API keys are present to prevent crashes (auth/invalid-api-key)
+let app;
+let auth;
+
+if (firebaseConfig.apiKey) {
+    app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
+    auth = getAuth(app);
+} else {
+    // Prevent crashes if keys are not set yet
+    console.warn("Firebase configuration is missing! Please add NEXT_PUBLIC_FIREBASE_API_KEY to your .env file.");
+    app = null;
+    auth = {
+        // Mock auth object to prevent immediate reference errors in components
+        currentUser: null,
+        onAuthStateChanged: () => () => { } // returns empty unsubscribe function
+    };
+}
+
+export { auth };
 export default app;
