@@ -28,15 +28,20 @@ const ImageGenerator = () => {
 
         // Simulating Precise AI Generation
         setTimeout(() => {
-            const seed = Math.floor(Math.random() * 1000);
+            const seed = Math.floor(Math.random() * 999999);
+            const [width, height] = resolution.split('x');
 
-            // Using Pollinations AI for real-time prompt-to-image generation
-            // This ensures the image matches the prompt exactly as requested.
-            const imageUrl = `https://pollinations.ai/p/${encodeURIComponent(prompt)}?width=${resolution.split('x')[0]}&height=${resolution.split('x')[1]}&seed=${seed}&model=flux`;
+            // Using the professional flux model for higher prompt accuracy
+            // Adding more descriptors to the prompt to force the AI to be more precise
+            const enhancedPrompt = `${prompt}${selectedStyle ? `, ${selectedStyle} style` : ''}`;
+            const encodedPrompt = encodeURIComponent(enhancedPrompt);
+
+            // Correct Pollinations Image Endpoint
+            const imageUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=${width}&height=${height}&seed=${seed}&model=flux&nologo=true`;
 
             setResult(imageUrl);
             setGenerating(false);
-        }, 3000);
+        }, 2000);
     };
 
     const handleImageUpload = (e) => {
