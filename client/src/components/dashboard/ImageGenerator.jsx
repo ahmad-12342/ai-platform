@@ -21,35 +21,33 @@ const ImageGenerator = () => {
     const [result, setResult] = useState(null);
     const [referenceImage, setReferenceImage] = useState(null);
     const [status, setStatus] = useState('');
+    const [imageLoading, setImageLoading] = useState(false);
 
     const handleGenerate = async () => {
         if (!prompt && !referenceImage) return;
+
         setGenerating(true);
         setResult(null);
-        setStatus('Waking up the GPUs...');
+        setImageLoading(true);
+        setStatus('Initializing Neural Engine...');
 
+        const seed = Math.floor(Math.random() * 1000000);
+        const [width, height] = resolution.split('x');
+
+        // Build a clean prompt
+        const cleanPrompt = prompt.trim() || (referenceImage ? "image variation" : "artistic masterpiece");
+        const stylePrefix = selectedStyle !== 'realistic' ? `${selectedStyle} style ` : "";
+        const finalPrompt = `${stylePrefix}${cleanPrompt}`.trim();
+        const encodedPrompt = encodeURIComponent(finalPrompt);
+
+        // Use the most direct and reliable pollinations endpoint
+        const imageUrl = `https://pollinations.ai/p/${encodedPrompt}?width=${width}&height=${height}&seed=${seed}&model=flux`;
+
+        // Small delay to show the "connecting" state
         setTimeout(() => {
-            const seed = Math.floor(Math.random() * 9999999);
-            const [width, height] = resolution.split('x');
-
-            // Build the final artistic prompt
-            const stylePrompt = selectedStyle ? `${selectedStyle} style, ` : "";
-            const finalPrompt = `${stylePrompt}${prompt}`.trim();
-            const encodedPrompt = encodeURIComponent(finalPrompt);
-
-            setStatus('Thinking about your vision...');
-
-            // This is the most stable and modern endpoint for Pollinations Flux
-            const imageUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=${width}&height=${height}&seed=${seed}&model=flux&nologo=true&enhance=true`;
-
-            console.log("🚀 FINAL AI IMAGE URL:", imageUrl);
-
-            setTimeout(() => {
-                setStatus('Almost there, rendering colors...');
-                setResult(imageUrl);
-                setGenerating(false);
-                setStatus('');
-            }, 1200);
+            setResult(imageUrl);
+            setGenerating(false);
+            setStatus('');
         }, 800);
     };
 
@@ -190,21 +188,30 @@ const ImageGenerator = () => {
                             <motion.div
                                 initial={{ opacity: 0, scale: 1.1 }}
                                 animate={{ opacity: 1, scale: 1 }}
-                                className="w-full h-full"
+                                className="w-full h-full relative"
                             >
+                                {imageLoading && (
+                                    <div className="absolute inset-0 z-20 flex flex-col items-center justify-center glass bg-black/40">
+                                        <RefreshCw className="w-10 h-10 animate-spin text-blue-500 mb-4" />
+                                        <p className="text-white font-bold animate-pulse">Rendering High-Quality Image...</p>
+                                    </div>
+                                )}
                                 <img
                                     key={result}
                                     src={result}
                                     alt="Generated"
-                                    className="w-full h-full object-cover"
+                                    className={`w-full h-full object-cover transition-opacity duration-500 ${imageLoading ? 'opacity-0' : 'opacity-100'}`}
+                                    onLoad={() => setImageLoading(false)}
                                     onError={(e) => {
                                         e.target.onerror = null;
-                                        e.target.src = "https://via.placeholder.com/1024x1024.png?text=AI+Busy+-+Check+Direct+Link";
+                                        e.target.src = "https://via.placeholder.com/1024x1024.png?text=AI+Busy+-+Try+Direct+Link";
+                                        setImageLoading(false);
                                     }}
                                 />
-                                <div className="absolute top-4 left-4 z-30">
-                                    <a href={result} target="_blank" rel="noreferrer" className="glass px-3 py-1 rounded-full text-[10px] text-white hover:bg-white/20 transition-all border border-white/10">
-                                        Open Direct Link
+                                <div className="absolute top-4 left-4 z-30 flex gap-2">
+                                    <a href={result} target="_blank" rel="noreferrer" className="glass px-4 py-2 rounded-full text-xs font-bold text-white hover:bg-white/20 transition-all border border-white/10 flex items-center gap-2">
+                                        <Sparkles className="w-4 h-4" />
+                                        Open Direct AI Link
                                     </a>
                                 </div>
                                 <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-6">
