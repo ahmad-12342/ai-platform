@@ -28,21 +28,24 @@ const ImageGenerator = () => {
 
         // Advanced AI Synthesis Simulation
         setTimeout(() => {
-            const seed = Math.floor(Math.random() * 1000000);
+            const seed = Math.floor(Math.random() * 999999);
+            const timestamp = Date.now();
             const [width, height] = resolution.split('x');
 
-            // Build a very high-quality, descriptive prompt for the AI engine
-            const qualityKeywords = "ultra-realistic, 8k, cinematic lighting, highly detailed, masterwork";
-            const finalPrompt = `${prompt}, ${selectedStyle} style, ${qualityKeywords}`;
-            const encodedPrompt = encodeURIComponent(finalPrompt);
+            // Strict prompt cleaning
+            const cleanPrompt = prompt.trim()
+                .replace(/[^a-zA-Z0-9\s,.-]/g, '') // Keep only letters, numbers, spaces, and basic punctuation
+                .substring(0, 500); // Limit length
 
-            // Using a more reliable endpoint for direct image embedding
-            const imageUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=${width}&height=${height}&seed=${seed}&model=flux&nologo=true&safe=true`;
+            const encodedPrompt = encodeURIComponent(cleanPrompt);
 
-            console.log("Generating image with URL:", imageUrl);
+            // Using the most stable Flux model endpoint
+            const imageUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=${width}&height=${height}&seed=${seed}&model=flux&nologo=true&t=${timestamp}`;
+
+            console.log("Generating URL:", imageUrl);
             setResult(imageUrl);
             setGenerating(false);
-        }, 1500); // Faster feedback
+        }, 2500); // More realistic delay to allow server preparation
     };
 
     const handleImageUpload = (e) => {
@@ -185,14 +188,20 @@ const ImageGenerator = () => {
                                 className="w-full h-full"
                             >
                                 <img
+                                    key={result}
                                     src={result}
                                     alt="Generated"
                                     className="w-full h-full object-cover"
                                     onError={(e) => {
                                         e.target.onerror = null;
-                                        e.target.src = "https://via.placeholder.com/1024x1024.png?text=AI+Engine+Busy+-+Try+Again+In+10s";
+                                        e.target.src = "https://via.placeholder.com/1024x1024.png?text=AI+Busy+-+Check+Direct+Link";
                                     }}
                                 />
+                                <div className="absolute top-4 left-4 z-30">
+                                    <a href={result} target="_blank" rel="noreferrer" className="glass px-3 py-1 rounded-full text-[10px] text-white hover:bg-white/20 transition-all border border-white/10">
+                                        Open Direct Link
+                                    </a>
+                                </div>
                                 <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-6">
                                     <div className="text-center">
                                         <p className="text-xl font-bold text-white mb-2">Generation Complete</p>
