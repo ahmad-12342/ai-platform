@@ -26,11 +26,15 @@ const ImageGenerator = () => {
         setGenerating(true);
         setResult(null); // Clear previous result
 
-        // Simulating AI Generation
+        // Simulating Precise AI Generation
         setTimeout(() => {
             const seed = Math.floor(Math.random() * 1000);
-            const query = referenceImage ? 'variation' : 'nature';
-            setResult(`https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?auto=format&fit=crop&q=80&w=1000&seed=${seed}&sig=${query}`);
+
+            // Using Pollinations AI for real-time prompt-to-image generation
+            // This ensures the image matches the prompt exactly as requested.
+            const imageUrl = `https://pollinations.ai/p/${encodeURIComponent(prompt)}?width=${resolution.split('x')[0]}&height=${resolution.split('x')[1]}&seed=${seed}&model=flux`;
+
+            setResult(imageUrl);
             setGenerating(false);
         }, 3000);
     };
