@@ -23,32 +23,23 @@ const ImageGenerator = () => {
     const [status, setStatus] = useState('');
     const [imageLoading, setImageLoading] = useState(false);
 
-    const handleGenerate = async () => {
+    const handleGenerate = () => {
         if (!prompt && !referenceImage) return;
 
         setGenerating(true);
         setResult(null);
         setImageLoading(true);
-        setStatus('Connecting to Neural Engine...');
 
-        // Random seed for unique results
-        const seed = Math.floor(Math.random() * 9999999);
+        const seed = Math.floor(Math.random() * 1000000);
         const [width, height] = resolution.split('x');
+        const finalPrompt = encodeURIComponent(prompt.trim() || "art");
 
-        // Preparing the prompt
-        const cleanPrompt = prompt.trim() || (referenceImage ? "variation of uploaded image" : "cinematic masterpiece");
-        const styleText = selectedStyle !== 'realistic' ? `${selectedStyle} style, ` : "";
-        const finalPrompt = `${styleText}${cleanPrompt}, high quality, 4k, detailed`.trim();
+        // SIMPLEST STABLE LINK
+        const imageUrl = `https://pollinations.ai/p/${finalPrompt}?width=${width}&height=${height}&seed=${seed}`;
 
-        // Direct High-Speed Image Endpoint
-        const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(finalPrompt)}?width=${width}&height=${height}&seed=${seed}&model=flux&nologo=true`;
-
-        // Set result immediately to start fetching
-        setTimeout(() => {
-            setResult(imageUrl);
-            setGenerating(false);
-            setStatus('');
-        }, 500);
+        // Display result immediately
+        setResult(imageUrl);
+        setGenerating(false);
     };
 
     const handleImageUpload = (e) => {
@@ -186,32 +177,33 @@ const ImageGenerator = () => {
                     <div className="relative aspect-video rounded-[2.5rem] overflow-hidden glass border border-white/10 group shadow-2xl">
                         {result ? (
                             <motion.div
-                                initial={{ opacity: 0, scale: 1.1 }}
-                                animate={{ opacity: 1, scale: 1 }}
-                                className="w-full h-full relative"
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                className="w-full h-full relative bg-gray-900"
                             >
                                 {imageLoading && (
-                                    <div className="absolute inset-0 z-20 flex flex-col items-center justify-center glass bg-black/40">
-                                        <RefreshCw className="w-10 h-10 animate-spin text-blue-500 mb-4" />
-                                        <p className="text-white font-bold animate-pulse">Rendering High-Quality Image...</p>
+                                    <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-black/80 backdrop-blur-sm">
+                                        <div className="w-12 h-12 border-2 border-blue-500 border-t-transparent rounded-full animate-spin mb-4"></div>
+                                        <p className="text-blue-400 font-medium animate-pulse">Neural Engine is Creating...</p>
                                     </div>
                                 )}
                                 <img
                                     key={result}
                                     src={result}
-                                    alt="Generated"
-                                    className={`w-full h-full object-cover transition-opacity duration-500 ${imageLoading ? 'opacity-0' : 'opacity-100'}`}
+                                    alt="AI Generated"
+                                    className="w-full h-full object-contain relative z-10"
                                     onLoad={() => setImageLoading(false)}
                                     onError={(e) => {
                                         e.target.onerror = null;
-                                        e.target.src = "https://via.placeholder.com/1024x1024.png?text=AI+Busy+-+Try+Direct+Link";
+                                        const p = prompt ? encodeURIComponent(prompt.substring(0, 100)) : 'art';
+                                        e.target.src = `https://pollinations.ai/p/${p}?width=1024&height=1024&seed=42`;
                                         setImageLoading(false);
                                     }}
                                 />
-                                <div className="absolute top-4 left-4 z-30 flex gap-2">
-                                    <a href={result} target="_blank" rel="noreferrer" className="glass px-4 py-2 rounded-full text-xs font-bold text-white hover:bg-white/20 transition-all border border-white/10 flex items-center gap-2">
-                                        <Sparkles className="w-4 h-4" />
-                                        Open Direct AI Link
+                                <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-40 flex gap-4">
+                                    <a href={result} target="_blank" rel="noreferrer" className="bg-primary hover:bg-primary/90 text-white px-8 py-3 rounded-full text-sm font-bold shadow-2xl transition-all flex items-center gap-2 whitespace-nowrap">
+                                        <Sparkles className="w-5 h-5" />
+                                        Full Screen View
                                     </a>
                                 </div>
                                 <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-6">
