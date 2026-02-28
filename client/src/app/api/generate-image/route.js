@@ -1,41 +1,26 @@
 import { NextResponse } from 'next/server';
-import { OPENAI_API_KEY } from '@/lib/apiKey';
+
+const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5000';
 
 export async function POST(req) {
     try {
-        const { prompt, resolution } = await req.json();
-
-        // Convert common resolutions to DALL-E 3 supported formats
-        // Standard DALL-E 3 sizes: 1024x1024, 1024x1792, 1792x1024
-        let size = '1024x1024';
-        if (resolution === '1920x1080') size = '1792x1024'; // landscape approximation
-        if (resolution === '1080x1920') size = '1024x1792'; // portrait approximation
-        // Default to 1024x1024 for 512x512
-
-        const response = await fetch('https://api.openai.com/v1/images/generations', {
+        const body = await req.json();
+        // Forward to Express backend which handles credits, saving & tracking
+        const response = await fetch(`${BACKEND_URL}/api/generate/image`, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${OPENAI_API_KEY}`
-            },
-            body: JSON.stringify({
-                model: 'dall-e-3',
-                prompt: prompt,
-                n: 1,
-                size: size
-            })
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body),
         });
 
         const data = await response.json();
 
         if (!response.ok) {
-            throw new Error(data.error?.message || 'Failed to generate image from OpenAI');
+            return NextResponse.json({ error: data.error || data.message }, { status: response.status });
         }
 
-        return NextResponse.json({ url: data.data[0].url });
-
+        return NextResponse.json(data);
     } catch (error) {
-        console.error("OpenAI Error:", error);
+        console.error('Generate image proxy error:', error);
         return NextResponse.json({ error: error.message }, { status: 500 });
     }
 }

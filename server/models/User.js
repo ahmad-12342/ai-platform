@@ -16,6 +16,18 @@ const userSchema = new mongoose.Schema({
         type: Number,
         default: 10 // Free starter credits
     },
+    totalGenerations: {
+        type: Number,
+        default: 0
+    },
+    storageUsed: {
+        type: Number, // In MB
+        default: 0
+    },
+    timeSaved: {
+        type: Number, // In Hours
+        default: 0
+    },
     plan: {
         type: String,
         enum: ['free', 'pro'],

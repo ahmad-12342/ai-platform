@@ -2,6 +2,8 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { ImageIcon, Download, Sparkles, Wand2, RefreshCw, Upload, X } from 'lucide-react';
+import { useAuth } from '@/context/AuthContext';
+import { saveGeneration } from '@/lib/firestoreService';
 
 const styles = [
     { id: 'realistic', label: 'Realistic', icon: '📸' },
@@ -14,6 +16,7 @@ const styles = [
 const resolutions = ['512x512', '1024x1024', '1920x1080', '1080x1920'];
 
 const ImageGenerator = () => {
+    const { user, refreshStats } = useAuth();
     const [prompt, setPrompt] = useState('');
     const [selectedStyle, setSelectedStyle] = useState('realistic');
     const [resolution, setResolution] = useState('1024x1024');
@@ -52,10 +55,26 @@ const ImageGenerator = () => {
                 throw new Error(data.error || 'Failed to generate');
             }
 
-            setResult(data.url);
+            const imageUrl = data.url;
+            setResult(imageUrl);
+
+            // ✅ Save to Firestore + refresh dashboard stats
+            if (user) {
+                await saveGeneration({
+                    uid: user.uid,
+                    type: 'image',
+                    prompt: finalPrompt,
+                    resultUrl: imageUrl,
+                    metadata: { style: selectedStyle, resolution },
+                    creditCost: 1,
+                    storageMB: 2.5,
+                    timeSavedHrs: 1.5,
+                });
+                refreshStats(); // Update dashboard stats live
+            }
         } catch (error) {
             console.error("Image generation failed:", error);
-            alert("Oops! OpenAI failed to imagine that: " + error.message);
+            alert("Oops! Image generation failed: " + error.message);
             setImageLoading(false);
         } finally {
             setGenerating(false);

@@ -1,35 +1,26 @@
 import { NextResponse } from 'next/server';
-import { OPENAI_API_KEY } from '@/lib/apiKey';
+
+const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5000';
 
 export async function POST(req) {
     try {
-        const { prompt, duration } = await req.json();
-
-        // Making a call to OpenAI's ecosystem using the provided API Key.
-        // Assuming Sora or an equivalent OpenAI video model endpoint structure for simulation purposes.
-        const response = await fetch('https://api.openai.com/v1/videos/generations', {
+        const body = await req.json();
+        // Forward to Express backend which handles credits, saving & tracking
+        const response = await fetch(`${BACKEND_URL}/api/generate/video`, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${OPENAI_API_KEY}`
-            },
-            body: JSON.stringify({
-                model: 'sora-1.0-turbo', // Hypothetical or beta model for OpenAI video
-                prompt: prompt,
-                duration: duration
-            })
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body),
         });
 
         const data = await response.json();
 
         if (!response.ok) {
-            throw new Error(data.error?.message || 'Failed to generate video from OpenAI');
+            return NextResponse.json({ error: data.error || data.message }, { status: response.status });
         }
 
-        return NextResponse.json({ url: data.data[0].url });
-
+        return NextResponse.json(data);
     } catch (error) {
-        console.error("OpenAI Video Error:", error);
+        console.error('Generate video proxy error:', error);
         return NextResponse.json({ error: error.message }, { status: 500 });
     }
 }
