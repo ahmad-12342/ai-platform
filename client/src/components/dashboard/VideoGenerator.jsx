@@ -1,7 +1,8 @@
-"use client";
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Video, Download, Play, RefreshCw, Sliders, Maximize } from 'lucide-react';
+import { useAuth } from '@/context/AuthContext';
+import { saveGeneration, checkDailyLimit } from '@/lib/firestoreService';
 
 const aspectRatios = [
     { id: '16:9', label: '16:9 Landscape', icon: '📺' },
@@ -12,6 +13,7 @@ const aspectRatios = [
 const durations = ['8s'];
 
 const VideoGenerator = () => {
+    const { user, refreshStats } = useAuth();
     const [prompt, setPrompt] = useState('');
     const [aspect, setAspect] = useState('16:9');
     const [duration, setDuration] = useState('8s');
@@ -21,6 +23,15 @@ const VideoGenerator = () => {
 
     const handleGenerate = async () => {
         if (!prompt) return;
+
+        // ✅ Check Daily Limits for Free Plan
+        if (user) {
+            const limitCheck = await checkDailyLimit(user.uid, 'video');
+            if (!limitCheck.allowed) {
+                alert(limitCheck.message);
+                return;
+            }
+        }
 
         console.log("Generating with OpenAI Video Model...");
         setGenerating(true);
@@ -46,6 +57,21 @@ const VideoGenerator = () => {
             }
 
             setVideoUrl(data.url);
+
+            // ✅ Save to Firestore + refresh dashboard stats
+            if (user) {
+                await saveGeneration({
+                    uid: user.uid,
+                    type: 'video',
+                    prompt: finalPrompt,
+                    resultUrl: data.url,
+                    metadata: { aspect, duration },
+                    creditCost: 5,
+                    storageMB: 50,
+                    timeSavedHrs: 5,
+                });
+                refreshStats(); // Update dashboard stats live
+            }
         } catch (error) {
             console.error("Video generation failed:", error);
             alert("Oops! OpenAI failed to render the video: " + error.message);

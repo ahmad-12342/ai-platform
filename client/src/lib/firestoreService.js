@@ -36,6 +36,13 @@ export async function syncUser(user) {
             totalGenerations: 0,
             storageUsed: 0, // MB
             timeSaved: 0,   // Hours
+            dailyCounts: {
+                image: 0,
+                video: 0,
+                cv: 0,
+                content: 0
+            },
+            lastUsageDate: new Date().toISOString().split('T')[0],
             createdAt: serverTimestamp(),
         });
     }
@@ -56,6 +63,21 @@ export async function getUserProfile(uid) {
 export async function saveGeneration({ uid, type, prompt, resultUrl = null, textContent = null, metadata = {}, creditCost, storageMB, timeSavedHrs }) {
     if (!db) return;
 
+    const today = new Date().toISOString().split('T')[0];
+    const userRef = doc(db, "users", uid);
+    const userSnap = await getDoc(userRef);
+    const userData = userSnap.data();
+
+    let dailyCounts = userData?.dailyCounts || { image: 0, video: 0, cv: 0, content: 0 };
+
+    // Reset counts if it's a new day
+    if (userData?.lastUsageDate !== today) {
+        dailyCounts = { image: 0, video: 0, cv: 0, content: 0 };
+    }
+
+    // Increment count for this type
+    dailyCounts[type] = (dailyCounts[type] || 0) + 1;
+
     // 1. Add generation document
     await addDoc(collection(db, "generations"), {
         uid,
@@ -68,12 +90,54 @@ export async function saveGeneration({ uid, type, prompt, resultUrl = null, text
     });
 
     // 2. Update user stats in one atomic write
-    await updateDoc(doc(db, "users", uid), {
+    await updateDoc(userRef, {
         credits: increment(-creditCost),
         totalGenerations: increment(1),
         storageUsed: increment(storageMB),
         timeSaved: increment(timeSavedHrs),
+        dailyCounts: dailyCounts,
+        lastUsageDate: today
     });
+}
+
+// Check if user has reached daily limits (Free Plan only)
+export async function checkDailyLimit(uid, type) {
+    if (!db) return { allowed: true };
+    const userRef = doc(db, "users", uid);
+    const snap = await getDoc(userRef);
+
+    if (!snap.exists()) return { allowed: true };
+    const userData = snap.data();
+
+    // Pro users have no daily limits based on type count (they use credits)
+    if (userData.plan === 'pro') return { allowed: true };
+
+    const today = new Date().toISOString().split('T')[0];
+    let counts = userData.dailyCounts || { image: 0, video: 0, cv: 0, content: 0 };
+
+    // Reset if new day
+    if (userData.lastUsageDate !== today) {
+        return { allowed: true };
+    }
+
+    const limits = {
+        image: 3,
+        video: 1,
+        cv: 1,
+        content: 1
+    };
+
+    const currentCount = counts[type] || 0;
+    const limit = limits[type] || 1;
+
+    if (currentCount >= limit) {
+        return {
+            allowed: false,
+            message: `Free plan limit reached: ${limit} ${type}${limit > 1 ? 's' : ''} per day. Upgrade to Pro for more!`
+        };
+    }
+
+    return { allowed: true };
 }
 
 // Get recent N generations for a user

@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { ImageIcon, Download, Sparkles, Wand2, RefreshCw, Upload, X } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
-import { saveGeneration } from '@/lib/firestoreService';
+import { saveGeneration, checkDailyLimit } from '@/lib/firestoreService';
 
 const styles = [
     { id: 'realistic', label: 'Realistic', icon: '📸' },
@@ -29,6 +29,15 @@ const ImageGenerator = () => {
 
     const handleGenerate = async () => {
         if (!prompt.trim() && !referenceImage) return;
+
+        // ✅ Check Daily Limits for Free Plan
+        if (user) {
+            const limitCheck = await checkDailyLimit(user.uid, 'image');
+            if (!limitCheck.allowed) {
+                alert(limitCheck.message);
+                return;
+            }
+        }
 
         console.log("Generating with OpenAI DALL-E...");
         setGenerating(true);

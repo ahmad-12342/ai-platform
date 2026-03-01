@@ -1,10 +1,13 @@
-"use client";
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { FileText, Download, User, Briefcase, GraduationCap, Code, Plus, Trash2, Edit3, Eye } from 'lucide-react';
+import { FileText, Download, User as UserIcon, Briefcase, GraduationCap, Code, Plus, Trash2, Edit3, Eye } from 'lucide-react';
+import { useAuth } from '@/context/AuthContext';
+import { saveGeneration, checkDailyLimit } from '@/lib/firestoreService';
 
 const CVGenerator = () => {
+    const { user, refreshStats } = useAuth();
     const [activeTab, setActiveTab] = useState('summary');
+    const [isPreview, setIsPreview] = useState(false);
     const [data, setData] = useState({
         name: 'John Doe',
         email: 'john@example.com',
@@ -15,8 +18,31 @@ const CVGenerator = () => {
         education: [{ school: 'University of AI', degree: 'MS in Computer Science' }]
     });
 
-    const handleExportPDF = () => {
+    const handleExportPDF = async () => {
+        // ✅ Check Daily Limits for Free Plan
+        if (user) {
+            const limitCheck = await checkDailyLimit(user.uid, 'cv');
+            if (!limitCheck.allowed) {
+                alert(limitCheck.message);
+                return;
+            }
+        }
+
         window.print();
+
+        // ✅ Save to Firestore + refresh dashboard stats
+        if (user) {
+            await saveGeneration({
+                uid: user.uid,
+                type: 'cv',
+                prompt: `Resume for ${data.name}`,
+                metadata: { template: 'pro' },
+                creditCost: 3,
+                storageMB: 1,
+                timeSavedHrs: 3,
+            });
+            refreshStats(); // Update dashboard stats live
+        }
     };
 
     return (
@@ -53,7 +79,7 @@ const CVGenerator = () => {
                     <>
                         <div className="lg:col-span-3 space-y-2">
                             {[
-                                { id: 'summary', icon: User, label: 'Summary' },
+                                { id: 'summary', icon: UserIcon, label: 'Summary' },
                                 { id: 'experience', icon: Briefcase, label: 'Experience' },
                                 { id: 'education', icon: GraduationCap, label: 'Education' },
                                 { id: 'skills', icon: Code, label: 'Skills' },

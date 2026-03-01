@@ -11,11 +11,12 @@ const plans = [
         yearlyPrice: "0",
         description: "Perfect for exploring our AI tools.",
         features: [
-            "10 free monthly credits",
-            "Standard Image Generation",
-            "Basic CV Templates",
-            "AI Writing (Limited)",
-            "Standard Support"
+            "3 AI Images per day",
+            "1 AI Video per day",
+            "1 Professional CV per day",
+            "1 AI Blog/Content per day",
+            "10 starter credits",
+            "Community Support"
         ],
         buttonText: "Grow for Free",
         popular: false

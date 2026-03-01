@@ -2,6 +2,8 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Sparkles, Copy, Check, Hash, Code, Layout, MessageSquare, Wand2, RefreshCw } from 'lucide-react';
+import { useAuth } from '@/context/AuthContext';
+import { saveGeneration, checkDailyLimit } from '@/lib/firestoreService';
 
 const types = [
     { id: 'blog', label: 'Blog Post', icon: Layout },
@@ -11,6 +13,7 @@ const types = [
 ];
 
 const ContentWriter = () => {
+    const { user, refreshStats } = useAuth();
     const [activeType, setActiveType] = useState('blog');
     const [topic, setTopic] = useState('');
     const [generating, setGenerating] = useState(false);
@@ -19,11 +22,37 @@ const ContentWriter = () => {
 
     const handleGenerate = async () => {
         if (!topic) return;
+
+        // ✅ Check Daily Limits for Free Plan
+        if (user) {
+            const limitCheck = await checkDailyLimit(user.uid, 'content');
+            if (!limitCheck.allowed) {
+                alert(limitCheck.message);
+                return;
+            }
+        }
+
         setGenerating(true);
         setResult('');
-        setTimeout(() => {
-            setResult(`## The Future of AI in Content Creation\n\nArtificial Intelligence is not just a tool; it's a co-creator that amplifies human potential. In the next decade, we'll see a shift from simple automation to deep collaboration between human intuition and machine efficiency...\n\n### Key Takeaways:\n1. Speed of iteration will increase 10x.\n2. Multimodal generation will become standard.\n3. Content personalization will reach individual level scale.\n\nGenerated specifically for: ${topic}`);
+        setTimeout(async () => {
+            const content = `## The Future of AI in Content Creation\n\nArtificial Intelligence is not just a tool; it's a co-creator that amplifies human potential. In the next decade, we'll see a shift from simple automation to deep collaboration between human intuition and machine efficiency...\n\n### Key Takeaways:\n1. Speed of iteration will increase 10x.\n2. Multimodal generation will become standard.\n3. Content personalization will reach individual level scale.\n\nGenerated specifically for: ${topic}`;
+            setResult(content);
             setGenerating(false);
+
+            // ✅ Save to Firestore + refresh dashboard stats
+            if (user) {
+                await saveGeneration({
+                    uid: user.uid,
+                    type: 'content',
+                    prompt: topic,
+                    textContent: content,
+                    metadata: { contentType: activeType },
+                    creditCost: 2,
+                    storageMB: 0.1,
+                    timeSavedHrs: 2,
+                });
+                refreshStats(); // Update dashboard stats live
+            }
         }, 3000);
     };
 
