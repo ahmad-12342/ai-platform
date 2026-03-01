@@ -112,70 +112,116 @@ export default function DashboardPage() {
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                {/* Live Recent Activity */}
-                <div className="glass p-8 rounded-[2.5rem] border border-white/5">
-                    <h2 className="text-xl font-bold mb-6 flex items-center gap-2">
-                        <History className="w-5 h-5 text-primary" /> Recent Activity
-                    </h2>
-                    <div className="space-y-4">
-                        {statsLoading ? (
-                            <div className="flex items-center gap-3 text-gray-500">
-                                <Loader2 className="w-4 h-4 animate-spin" />
-                                <span className="text-sm">Loading activity...</span>
+                {/* Visual Creation Gallery (Item 2) */}
+                <div>
+                    <div className="flex items-center justify-between mb-8">
+                        <h2 className="text-2xl font-bold flex items-center gap-3">
+                            <History className="text-primary w-6 h-6" />
+                            Generation Gallery
+                        </h2>
+                        <Link href="/dashboard/history" className="text-primary text-sm font-bold hover:underline">
+                            View All Creations
+                        </Link>
+                    </div>
+
+                    {statsLoading ? (
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                            {[1, 2, 3, 4].map(i => (
+                                <div key={i} className="aspect-square glass rounded-2xl animate-pulse bg-white/5 border border-white/5" />
+                            ))}
+                        </div>
+                    ) : recentActivity.length === 0 ? (
+                        <div className="glass p-12 rounded-[2.5rem] border border-white/5 text-center">
+                            <div className="w-16 h-16 bg-white/5 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <ImageIcon className="text-gray-600 w-8 h-8" />
                             </div>
-                        ) : recentActivity.length === 0 ? (
-                            <p className="text-sm text-gray-500">No activity yet. Start generating!</p>
-                        ) : (
-                            recentActivity.map((item, i) => {
-                                const Icon = typeIcon[item.type] || Sparkles;
-                                return (
-                                    <div key={i} className="flex items-center justify-between p-4 bg-white/5 rounded-2xl border border-white/5 hover:bg-white/10 transition-all">
-                                        <div className="flex items-center gap-4">
-                                            <div className="w-10 h-10 rounded-lg bg-primary/20 flex items-center justify-center">
-                                                <Icon className="w-5 h-5 text-primary" />
-                                            </div>
-                                            <div>
-                                                <p className="font-medium text-sm line-clamp-1">{item.prompt}</p>
-                                                <p className="text-xs text-gray-500">{typeLabel[item.type] || item.type} • {timeAgo(item.createdAt)}</p>
+                            <p className="text-gray-500 font-medium italic">Your gallery is empty. Start creating to see your work here!</p>
+                        </div>
+                    ) : (
+                        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                            {recentActivity.map((item, i) => (
+                                <motion.div
+                                    key={i}
+                                    initial={{ opacity: 0, scale: 0.9 }}
+                                    animate={{ opacity: 1, scale: 1 }}
+                                    transition={{ delay: i * 0.05 }}
+                                    className="group relative aspect-square rounded-2xl overflow-hidden glass border border-white/10 hover:border-primary/50 transition-all shadow-xl"
+                                >
+                                    {item.type === 'image' || item.type === 'video' ? (
+                                        <div className="w-full h-full">
+                                            {item.type === 'image' ? (
+                                                <img src={item.resultUrl} alt="Gen" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+                                            ) : (
+                                                <div className="w-full h-full bg-purple-500/20 flex flex-col items-center justify-center font-bold text-[10px] text-purple-400">
+                                                    <Video className="w-6 h-6 mb-1" />
+                                                    VIDEO GEN
+                                                </div>
+                                            )}
+                                            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-all p-4 flex flex-col justify-end">
+                                                <p className="text-white text-[10px] font-bold line-clamp-2 mb-1">{item.prompt}</p>
+                                                <div className="flex items-center justify-between">
+                                                    <span className="text-[8px] text-gray-400 font-bold uppercase tracking-widest">{timeAgo(item.createdAt)}</span>
+                                                    <a href={item.resultUrl} target="_blank" className="p-1.5 bg-primary rounded-lg">
+                                                        <Zap className="w-3 h-3 text-white fill-current" />
+                                                    </a>
+                                                </div>
                                             </div>
                                         </div>
-                                        {item.resultUrl && (
-                                            <a
-                                                href={item.resultUrl}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                className="text-xs text-primary font-bold hover:underline ml-2 shrink-0"
-                                            >
-                                                View
-                                            </a>
-                                        )}
-                                    </div>
-                                );
-                            })
-                        )}
-                    </div>
+                                    ) : (
+                                        <div className="w-full h-full flex flex-col items-center justify-center p-4 bg-gradient-to-br from-white/5 to-transparent">
+                                            <div className={`w-8 h-8 rounded-lg mb-2 flex items-center justify-center ${item.type === 'cv' ? 'bg-pink-500/20 text-pink-400' : 'bg-orange-500/20 text-orange-400'}`}>
+                                                {item.type === 'cv' ? <FileText className="w-4 h-4" /> : <Sparkles className="w-4 h-4" />}
+                                            </div>
+                                            <p className="text-[10px] font-bold text-center group-hover:text-primary transition-colors">{item.type.toUpperCase()}</p>
+                                            <p className="text-[8px] text-gray-500 mt-2">{timeAgo(item.createdAt)}</p>
+                                        </div>
+                                    )}
+                                </motion.div>
+                            ))}
+                        </div>
+                    )}
                 </div>
 
-                {/* Pro Tip */}
-                <div className="glass p-8 rounded-[2.5rem] bg-gradient-to-br from-primary/10 to-transparent border border-white/5 relative overflow-hidden group">
-                    <div className="relative z-10">
-                        <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center mb-6 shadow-xl">
-                            <Zap className="text-black w-6 h-6" />
-                        </div>
-                        <h2 className="text-xl font-bold mb-4">Pro Lumetrix Tip</h2>
-                        <p className="text-gray-300 mb-6 leading-relaxed text-sm">
-                            Use descriptive prompts for better results. For images, try adding lighting details like
-                            &quot;cinematic lighting&quot; or &quot;golden hour&quot; to make your creations stand out.
-                        </p>
-                        <div className="flex items-center gap-3">
-                            <div className={`px-3 py-1 rounded-full text-xs font-bold ${userStats?.plan === 'pro' ? 'bg-yellow-500/20 text-yellow-400' : 'bg-gray-500/20 text-gray-400'}`}>
-                                {userStats?.plan === 'pro' ? '⭐ PRO' : 'FREE PLAN'}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    {/* Pro Tip */}
+                    <div className="glass p-8 rounded-[2.5rem] bg-gradient-to-br from-primary/10 to-transparent border border-white/5 relative overflow-hidden group">
+                        <div className="relative z-10">
+                            <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center mb-6 shadow-xl">
+                                <Zap className="text-black w-6 h-6" />
                             </div>
-                            <span className="text-xs text-gray-500">{userStats?.credits ?? '—'} credits remaining</span>
+                            <h2 className="text-xl font-bold mb-4">Pro Creator Insight</h2>
+                            <p className="text-gray-300 mb-6 leading-relaxed text-sm">
+                                Use the 🪄 <strong>Refine Prompt</strong> tool in the generator to automatically turn your ideas into high-quality AI masterpieces.
+                                Detailed prompts get 10x better results!
+                            </p>
+                            <div className="flex items-center gap-3">
+                                <div className={`px-3 py-1 rounded-full text-xs font-bold ${userStats?.plan === 'pro' ? 'bg-yellow-500/20 text-yellow-400' : 'bg-gray-500/20 text-gray-400'}`}>
+                                    {userStats?.plan === 'pro' ? '⭐ PRO' : 'FREE PLAN'}
+                                </div>
+                                <span className="text-xs text-gray-500">{userStats?.credits ?? '—'} credits remaining</span>
+                            </div>
+                        </div>
+                        <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:scale-125 transition-transform duration-700">
+                            <Sparkles className="w-32 h-32" />
                         </div>
                     </div>
-                    <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:scale-125 transition-transform duration-700">
-                        <Sparkles className="w-32 h-32" />
+
+                    {/* Dashboard Stats (Item 3) */}
+                    <div className="glass p-8 rounded-[2.5rem] border border-white/5">
+                        <h2 className="text-xl font-bold mb-6 flex items-center gap-2">
+                            <TrendingUp className="w-5 h-5 text-primary" /> Performance Analytics
+                        </h2>
+                        <div className="grid grid-cols-2 gap-4">
+                            {stats.map((stat, idx) => (
+                                <div key={idx} className="p-4 bg-white/5 rounded-2xl border border-white/5 hover:border-white/10 transition-all">
+                                    <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1">{stat.label}</p>
+                                    <div className="flex items-center justify-between">
+                                        <p className={`text-xl font-bold ${stat.color}`}>{stat.value}</p>
+                                        <stat.icon className={`w-4 h-4 opacity-50 ${stat.color}`} />
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
                     </div>
                 </div>
             </div>

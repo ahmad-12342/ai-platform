@@ -19,6 +19,27 @@ const ContentWriter = () => {
     const [generating, setGenerating] = useState(false);
     const [result, setResult] = useState('');
     const [copied, setCopied] = useState(false);
+    const [refining, setRefining] = useState(false);
+
+    const handleRefinePrompt = async () => {
+        if (!topic.trim() || refining) return;
+        setRefining(true);
+        try {
+            const response = await fetch('/api/ai-tools/refine', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ prompt: topic, type: activeType })
+            });
+            const data = await response.json();
+            if (data.refinedPrompt) {
+                setTopic(data.refinedPrompt);
+            }
+        } catch (error) {
+            console.error("Refinement failed:", error);
+        } finally {
+            setRefining(false);
+        }
+    };
 
     const handleGenerate = async () => {
         if (!topic) return;
@@ -96,6 +117,21 @@ const ContentWriter = () => {
                                 placeholder="Topic for your content (e.g. Benefits of Web3)..."
                                 className="w-full bg-transparent border-none outline-none py-6 text-lg text-white placeholder:text-gray-600"
                             />
+                            <div className="flex items-center gap-1 mr-2">
+                                <motion.button
+                                    whileHover={{ scale: 1.1 }}
+                                    whileTap={{ scale: 0.9 }}
+                                    onClick={handleRefinePrompt}
+                                    disabled={refining || !topic.trim()}
+                                    title="Magic Prompt Refiner"
+                                    className="p-3 hover:bg-white/10 rounded-full transition-all group relative"
+                                >
+                                    <Wand2 className={`w-5 h-5 ${refining ? 'animate-pulse text-primary' : 'text-gray-400 group-hover:text-primary'}`} />
+                                    <span className="absolute -top-10 left-1/2 -translate-x-1/2 bg-black text-white text-[10px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                                        Refine Topic
+                                    </span>
+                                </motion.button>
+                            </div>
                         </div>
                         <button
                             onClick={handleGenerate}

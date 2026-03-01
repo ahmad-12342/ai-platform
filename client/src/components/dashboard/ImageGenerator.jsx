@@ -21,11 +21,32 @@ const ImageGenerator = () => {
     const [selectedStyle, setSelectedStyle] = useState('realistic');
     const [resolution, setResolution] = useState('1024x1024');
     const [generating, setGenerating] = useState(false);
+    const [refining, setRefining] = useState(false);
     const [result, setResult] = useState(null);
     const [referenceImage, setReferenceImage] = useState(null);
     const [status, setStatus] = useState('');
     const [imageLoading, setImageLoading] = useState(false);
     const [loadingTimeoutId, setLoadingTimeoutId] = useState(null);
+
+    const handleRefinePrompt = async () => {
+        if (!prompt.trim() || refining) return;
+        setRefining(true);
+        try {
+            const response = await fetch('/api/ai-tools/refine', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ prompt, type: 'image' })
+            });
+            const data = await response.json();
+            if (data.refinedPrompt) {
+                setPrompt(data.refinedPrompt);
+            }
+        } catch (error) {
+            console.error("Refinement failed:", error);
+        } finally {
+            setRefining(false);
+        }
+    };
 
     const handleGenerate = async () => {
         if (!prompt.trim() && !referenceImage) return;
@@ -169,7 +190,20 @@ const ImageGenerator = () => {
                                 placeholder={referenceImage ? "Describe how to modify this image..." : "A cinematic shot of a neon-lit futuristic Tokyo street in the rain..."}
                                 className="w-full bg-transparent border-none outline-none py-6 text-lg text-white placeholder:text-gray-600"
                             />
-                            <div className="flex items-center gap-2 mr-2">
+                            <div className="flex items-center gap-1 mr-2">
+                                <motion.button
+                                    whileHover={{ scale: 1.1 }}
+                                    whileTap={{ scale: 0.9 }}
+                                    onClick={handleRefinePrompt}
+                                    disabled={refining || !prompt.trim()}
+                                    title="Magic Prompt Refiner"
+                                    className="p-3 hover:bg-white/10 rounded-full transition-all group relative"
+                                >
+                                    <Wand2 className={`w-5 h-5 ${refining ? 'animate-pulse text-primary' : 'text-gray-400 group-hover:text-primary'}`} />
+                                    <span className="absolute -top-10 left-1/2 -translate-x-1/2 bg-black text-white text-[10px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                                        Refine Prompt
+                                    </span>
+                                </motion.button>
                                 <label className="cursor-pointer p-3 hover:bg-white/10 rounded-full transition-all group relative">
                                     <Upload className="w-5 h-5 text-gray-400 group-hover:text-primary" />
                                     <input type="file" className="hidden" accept="image/*" onChange={handleImageUpload} />

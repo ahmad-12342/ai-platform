@@ -7,6 +7,7 @@ import mongoose from 'mongoose';
 import authRoutes from './routes/auth.js';
 import generationRoutes from './routes/generation.js';
 import paymentRoutes from './routes/payment.js';
+import aiToolsRoutes from './routes/aiTools.js';
 
 // Load env variables
 dotenv.config();
@@ -29,6 +30,7 @@ app.use(morgan('dev'));
 app.use('/api/auth', authRoutes);
 app.use('/api/generate', generationRoutes);
 app.use('/api/payment', paymentRoutes);
+app.use('/api/ai-tools', aiToolsRoutes);
 
 // Database Connection
 mongoose.connect(process.env.MONGODB_URI)
