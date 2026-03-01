@@ -27,7 +27,7 @@ const PaymentModal = ({ isOpen, onClose, plan, billingCycle }) => {
                     const userRef = doc(db, "users", user.uid);
                     await updateDoc(userRef, {
                         plan: plan.name.toLowerCase(),
-                        credits: plan.name === 'Pro' ? 500 : 1000, // Pro: 500, Enterprise: 1000
+                        credits: plan.name === 'Pro' ? 500 : 1000,
                     });
                     await refreshStats();
                 }
@@ -152,14 +152,22 @@ const PaymentModal = ({ isOpen, onClose, plan, billingCycle }) => {
                                 </motion.div>
                                 <h2 className="text-3xl font-bold mb-4">Payment Confirmed!</h2>
                                 <p className="text-gray-400 mb-8 leading-relaxed">
-                                    Welcome to the <span className="text-white font-bold uppercase">{plan.name}</span> plan.
-                                    Your account has been updated with new credits and features.
+                                    {user
+                                        ? `Welcome to the ${plan.name} plan. Your account has been updated with new credits and features.`
+                                        : `Your payment for ${plan.name} was successful! Now, please create an account to activate your plan.`
+                                    }
                                 </p>
                                 <button
-                                    onClick={onClose}
+                                    onClick={() => {
+                                        if (user) {
+                                            onClose();
+                                        } else {
+                                            window.location.href = "/signup";
+                                        }
+                                    }}
                                     className="w-full py-4 rounded-full bg-white text-black font-bold hover:bg-gray-200 transition-all shadow-lg"
                                 >
-                                    Start Creating
+                                    {user ? 'Start Creating' : 'Sign Up to Claim'}
                                 </button>
                             </div>
                         )}
