@@ -32,6 +32,12 @@ const VideoGenerator = () => {
                 body: JSON.stringify({ prompt, type: 'video' })
             });
             const data = await response.json();
+
+            if (response.status === 422) {
+                alert(data.message);
+                return;
+            }
+
             if (data.refinedPrompt) {
                 setPrompt(data.refinedPrompt);
             }

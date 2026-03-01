@@ -12,8 +12,8 @@ const openai = new OpenAI({
 router.post('/refine', async (req, res) => {
     const { prompt, type } = req.body;
 
-    if (!prompt) {
-        return res.status(400).json({ error: 'Prompt is required' });
+    if (!prompt || prompt.length < 3) {
+        return res.status(400).json({ error: 'Prompt is too short to be valid.' });
     }
 
     try {
@@ -22,12 +22,14 @@ router.post('/refine', async (req, res) => {
             messages: [
                 {
                     role: "system",
-                    content: `You are an expert AI prompt engineer. Your task is to refine the user's simple prompt into a high-quality, detailed, and cinematic prompt for an ${type} generation model like DALL-E 3 or Runway Gen-2. 
+                    content: `You are an AI Prompt Validator and Refiner. 
+                    1. FIRST: Check if the user's prompt is a valid request, even if there are spelling mistakes. 
+                    2. IF the prompt is total gibberish, random characters (like 'asdfgh'), or completely nonsensical, return ONLY the word '[INVALID]'.
+                    3. IF it's valid, fix the spelling and refine it into a high-quality, cinematic ${type} prompt.
                     - Keep the core idea.
-                    - Add specific details about lighting, atmosphere, camera angle, and style.
-                    - Use professional artistic terms.
+                    - Add artistic details.
                     - Keep it under 75 words.
-                    - Return ONLY the refined prompt text, no explanations.`
+                    - Return ONLY the refined prompt text (or [INVALID]), no explanations.`
                 },
                 {
                     role: "user",
@@ -35,10 +37,18 @@ router.post('/refine', async (req, res) => {
                 }
             ],
             max_tokens: 150,
-            temperature: 0.7,
+            temperature: 0.3, // Lower temperature for stricter validation
         });
 
         const refinedPrompt = response.choices[0].message.content.trim();
+
+        if (refinedPrompt.includes('[INVALID]')) {
+            return res.status(422).json({
+                error: 'Nonsense or invalid prompt detected.',
+                message: 'Aap ka prompt samajh nahi aa raha. Please sahi se likhein (e.g. "A cat in a hat" bajaye "asdhjkas").'
+            });
+        }
+
         res.json({ refinedPrompt });
     } catch (error) {
         console.error('Prompt refinement error:', error);

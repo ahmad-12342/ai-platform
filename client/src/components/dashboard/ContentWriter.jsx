@@ -31,6 +31,12 @@ const ContentWriter = () => {
                 body: JSON.stringify({ prompt: topic, type: activeType })
             });
             const data = await response.json();
+
+            if (response.status === 422) {
+                alert(data.message);
+                return;
+            }
+
             if (data.refinedPrompt) {
                 setTopic(data.refinedPrompt);
             }

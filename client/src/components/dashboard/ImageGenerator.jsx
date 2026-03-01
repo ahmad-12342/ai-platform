@@ -38,6 +38,12 @@ const ImageGenerator = () => {
                 body: JSON.stringify({ prompt, type: 'image' })
             });
             const data = await response.json();
+
+            if (response.status === 422) {
+                alert(data.message);
+                return;
+            }
+
             if (data.refinedPrompt) {
                 setPrompt(data.refinedPrompt);
             }
