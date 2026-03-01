@@ -28,7 +28,7 @@ const Navbar = () => {
                 </Link>
 
                 {/* Desktop Links */}
-                <div className="hidden md:flex items-center gap-8">
+                <div className="hidden md:flex items-center gap-8 mt-1">
                     {['Features', 'Pricing', 'FAQ'].map((link) => (
                         <Link key={link} href={`/#${link.toLowerCase()}`} className="text-gray-400 hover:text-white transition-colors font-medium">
                             {link}
@@ -39,9 +39,6 @@ const Navbar = () => {
                 <div className="flex items-center gap-4">
                     {user ? (
                         <div className="flex items-center gap-4">
-                            <Link href="/dashboard/images" className="hidden md:block font-medium text-gray-400 hover:text-white transition-colors">
-                                Dashboard
-                            </Link>
                             <img src={user.photoURL} alt="Profile" className="w-10 h-10 rounded-full border-2 border-primary object-cover" />
                             <button onClick={logout} className="hidden md:flex items-center gap-2 px-4 py-2 rounded-full font-bold bg-white/10 hover:bg-white/20 text-white transition-all text-sm">
                                 <LogOut className="w-4 h-4" />
@@ -84,7 +81,6 @@ const Navbar = () => {
                     ))}
                     {user ? (
                         <>
-                            <Link href="/dashboard/images" onClick={() => setMobileMenu(false)} className="text-lg font-medium">Dashboard</Link>
                             <button onClick={() => { logout(); setMobileMenu(false); }} className="text-lg font-medium text-left flex items-center gap-2 text-red-400">
                                 <LogOut className="w-5 h-5" /> Logout
                             </button>

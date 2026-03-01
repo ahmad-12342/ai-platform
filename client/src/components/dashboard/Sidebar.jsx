@@ -24,7 +24,7 @@ const menuItems = [
 ];
 
 const secondaryItems = [
-    { icon: CreditCard, label: 'Billing', href: '/dashboard/billing' },
+    { icon: CreditCard, label: 'Pricing', href: '/#pricing' },
     { icon: User, label: 'Profile', href: '/dashboard/profile' },
 ];
 
