@@ -3,6 +3,8 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Check, Sparkles } from 'lucide-react';
 import Link from 'next/link';
+import PaymentModal from './PaymentModal';
+import { useAuth } from '@/context/AuthContext';
 
 const plans = [
     {
@@ -56,7 +58,16 @@ const plans = [
 ];
 
 const Pricing = () => {
+    const { user } = useAuth();
     const [billingCycle, setBillingCycle] = useState('monthly');
+    const [selectedPlan, setSelectedPlan] = useState(null);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+
+    const handlePlanSelect = (plan) => {
+        if (plan.monthlyPrice === "0") return; // Starter is free
+        setSelectedPlan(plan);
+        setIsModalOpen(true);
+    };
 
     return (
         <section id="pricing" className="py-24 relative">
@@ -124,14 +135,23 @@ const Pricing = () => {
                                 ))}
                             </ul>
 
-                            <Link href="/signup">
-                                <button className={`w-full py-4 rounded-full font-bold transition-all ${plan.popular
-                                    ? 'bg-primary text-white hover:bg-primary/90 shadow-lg shadow-primary/25'
-                                    : 'bg-white text-black hover:bg-gray-200'
-                                    }`}>
+                            {plan.monthlyPrice === "0" ? (
+                                <Link href="/signup" className="block w-full">
+                                    <button className="w-full py-4 rounded-full font-bold bg-white text-black hover:bg-gray-200 transition-all">
+                                        {plan.buttonText}
+                                    </button>
+                                </Link>
+                            ) : (
+                                <button
+                                    onClick={() => handlePlanSelect(plan)}
+                                    className={`w-full py-4 rounded-full font-bold transition-all ${plan.popular
+                                        ? 'bg-primary text-white hover:bg-primary/90 shadow-lg shadow-primary/25'
+                                        : 'bg-white/10 text-white border border-white/10 hover:bg-white/20'
+                                        }`}
+                                >
                                     {plan.buttonText}
                                 </button>
-                            </Link>
+                            )}
 
                             {billingCycle === 'yearly' && plan.yearlyPrice !== "0" && (
                                 <p className="text-center text-[10px] text-primary mt-4 font-bold uppercase tracking-wider">
@@ -142,6 +162,14 @@ const Pricing = () => {
                     ))}
                 </div>
             </div>
+
+            {/* Payment Modal */}
+            <PaymentModal
+                isOpen={isModalOpen}
+                onClose={() => setIsModalOpen(false)}
+                plan={selectedPlan}
+                billingCycle={billingCycle}
+            />
         </section>
     );
 };
