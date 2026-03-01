@@ -135,23 +135,17 @@ const Pricing = () => {
                                 ))}
                             </ul>
 
-                            {plan.monthlyPrice === "0" ? (
-                                <Link href="/signup" className="block w-full">
-                                    <button className="w-full py-4 rounded-full font-bold bg-white text-black hover:bg-gray-200 transition-all">
-                                        {plan.buttonText}
-                                    </button>
-                                </Link>
-                            ) : (
-                                <button
-                                    onClick={() => handlePlanSelect(plan)}
-                                    className={`w-full py-4 rounded-full font-bold transition-all ${plan.popular
-                                        ? 'bg-primary text-white hover:bg-primary/90 shadow-lg shadow-primary/25'
+                            <button
+                                onClick={() => handlePlanSelect(plan)}
+                                className={`w-full py-4 rounded-full font-bold transition-all ${plan.popular
+                                    ? 'bg-primary text-white hover:bg-primary/90 shadow-lg shadow-primary/25'
+                                    : plan.monthlyPrice === "0"
+                                        ? 'bg-white text-black hover:bg-gray-200'
                                         : 'bg-white/10 text-white border border-white/10 hover:bg-white/20'
-                                        }`}
-                                >
-                                    {plan.buttonText}
-                                </button>
-                            )}
+                                    }`}
+                            >
+                                {plan.buttonText}
+                            </button>
 
                             {billingCycle === 'yearly' && plan.yearlyPrice !== "0" && (
                                 <p className="text-center text-[10px] text-primary mt-4 font-bold uppercase tracking-wider">

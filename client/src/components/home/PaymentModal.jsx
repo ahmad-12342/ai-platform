@@ -27,7 +27,7 @@ const PaymentModal = ({ isOpen, onClose, plan, billingCycle }) => {
                     const userRef = doc(db, "users", user.uid);
                     await updateDoc(userRef, {
                         plan: plan.name.toLowerCase(),
-                        credits: plan.name === 'Pro' ? 500 : 1000,
+                        credits: plan.name === 'Starter' ? 10 : (plan.name === 'Pro' ? 500 : 1000),
                     });
                     await refreshStats();
                 }
@@ -93,34 +93,42 @@ const PaymentModal = ({ isOpen, onClose, plan, billingCycle }) => {
                                 </div>
 
                                 <form onSubmit={handlePayment} className="space-y-6">
-                                    <div className="space-y-4">
-                                        <div className="space-y-2">
-                                            <label className="text-xs font-bold text-gray-400 uppercase tracking-wider ml-1">Card Number</label>
-                                            <div className="relative">
-                                                <input
-                                                    required
-                                                    placeholder="0000 0000 0000 0000"
-                                                    className="w-full bg-white/5 border border-white/10 rounded-2xl p-4 text-white focus:border-primary/50 transition-all outline-none"
-                                                />
-                                                <CreditCard className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
+                                    {total > 0 ? (
+                                        <div className="space-y-4">
+                                            <div className="space-y-2">
+                                                <label className="text-xs font-bold text-gray-400 uppercase tracking-wider ml-1">Card Number</label>
+                                                <div className="relative">
+                                                    <input
+                                                        required
+                                                        placeholder="0000 0000 0000 0000"
+                                                        className="w-full bg-white/5 border border-white/10 rounded-2xl p-4 text-white focus:border-primary/50 transition-all outline-none"
+                                                    />
+                                                    <CreditCard className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
+                                                </div>
+                                            </div>
+                                            <div className="grid grid-cols-2 gap-4">
+                                                <div className="space-y-2">
+                                                    <label className="text-xs font-bold text-gray-400 uppercase tracking-wider ml-1">Expiry</label>
+                                                    <input required placeholder="MM/YY" className="w-full bg-white/5 border border-white/10 rounded-2xl p-4 text-white focus:border-primary/50 transition-all outline-none" />
+                                                </div>
+                                                <div className="space-y-2">
+                                                    <label className="text-xs font-bold text-gray-400 uppercase tracking-wider ml-1">CVV</label>
+                                                    <input required placeholder="123" className="w-full bg-white/5 border border-white/10 rounded-2xl p-4 text-white focus:border-primary/50 transition-all outline-none" />
+                                                </div>
+                                            </div>
+                                            <div className="flex items-center gap-2 text-[10px] text-gray-500 bg-white/5 p-3 rounded-xl border border-white/5">
+                                                <ShieldCheck className="w-4 h-4 text-green-500" />
+                                                <span>Your transaction is encrypted and secured by Stripe</span>
                                             </div>
                                         </div>
-                                        <div className="grid grid-cols-2 gap-4">
-                                            <div className="space-y-2">
-                                                <label className="text-xs font-bold text-gray-400 uppercase tracking-wider ml-1">Expiry</label>
-                                                <input required placeholder="MM/YY" className="w-full bg-white/5 border border-white/10 rounded-2xl p-4 text-white focus:border-primary/50 transition-all outline-none" />
+                                    ) : (
+                                        <div className="p-6 bg-white/5 border border-white/5 rounded-2xl text-center space-y-3">
+                                            <div className="w-12 h-12 bg-green-500/10 rounded-full flex items-center justify-center mx-auto">
+                                                <CheckCircle2 className="w-6 h-6 text-green-500" />
                                             </div>
-                                            <div className="space-y-2">
-                                                <label className="text-xs font-bold text-gray-400 uppercase tracking-wider ml-1">CVV</label>
-                                                <input required placeholder="123" className="w-full bg-white/5 border border-white/10 rounded-2xl p-4 text-white focus:border-primary/50 transition-all outline-none" />
-                                            </div>
+                                            <p className="text-sm text-gray-400">No payment required for this plan. Just click below to activate your starter pack!</p>
                                         </div>
-                                    </div>
-
-                                    <div className="flex items-center gap-2 text-[10px] text-gray-500 bg-white/5 p-3 rounded-xl border border-white/5">
-                                        <ShieldCheck className="w-4 h-4 text-green-500" />
-                                        <span>Your transaction is encrypted and secured by Stripe</span>
-                                    </div>
+                                    )}
 
                                     <button
                                         type="submit"
@@ -130,12 +138,12 @@ const PaymentModal = ({ isOpen, onClose, plan, billingCycle }) => {
                                         {loading ? (
                                             <>
                                                 <Loader2 className="w-5 h-5 animate-spin" />
-                                                Processing Securely...
+                                                {total > 0 ? 'Processing Securely...' : 'Activating...'}
                                             </>
                                         ) : (
                                             <>
-                                                <Zap className="w-5 h-5 fill-current" />
-                                                Pay ${total} Now
+                                                {total > 0 ? <Zap className="w-5 h-5 fill-current" /> : <Sparkles className="w-5 h-5" />}
+                                                {total > 0 ? `Pay $${total} Now` : 'Activate Free Plan'}
                                             </>
                                         )}
                                     </button>
