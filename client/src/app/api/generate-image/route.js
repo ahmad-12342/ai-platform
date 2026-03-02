@@ -1,9 +1,4 @@
 import { NextResponse } from 'next/server';
-import OpenAI from 'openai';
-
-const openai = new OpenAI({
-    apiKey: process.env.OPENAI_API_KEY,
-});
 
 export async function POST(req) {
     try {
@@ -13,14 +8,28 @@ export async function POST(req) {
             return NextResponse.json({ error: 'OpenAI API key is missing' }, { status: 500 });
         }
 
-        const response = await openai.images.generate({
-            model: "dall-e-3",
-            prompt: `${style} style, ${prompt}, high resolution, professional quality`,
-            n: 1,
-            size: resolution,
+        const response = await fetch('https://api.openai.com/v1/images/generations', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
+            },
+            body: JSON.stringify({
+                model: "dall-e-3",
+                prompt: `${style} style, ${prompt}, high resolution, professional quality`,
+                n: 1,
+                size: resolution,
+            }),
         });
 
-        const imageUrl = response.data[0].url;
+        const data = await response.json();
+
+        if (!response.ok) {
+            console.error("OpenAI error:", data);
+            return NextResponse.json({ error: data.error?.message || 'Failed to generate image' }, { status: response.status });
+        }
+
+        const imageUrl = data.data[0].url;
 
         return NextResponse.json({ url: imageUrl, imageUrl: imageUrl });
     } catch (error) {
