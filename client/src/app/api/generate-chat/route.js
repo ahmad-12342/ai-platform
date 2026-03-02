@@ -4,35 +4,27 @@ export async function POST(req) {
     try {
         const { prompt } = await req.json();
 
-        if (!process.env.OPENAI_API_KEY) {
-            return NextResponse.json({ error: 'OpenAI API key is missing' }, { status: 500 });
-        }
+        // Using PicoApps LLM API for chat as requested in common with image generation
+        const apiUrl = "https://backend.buildpicoapps.com/aero/run/llm-api?pk=v1-Z0FBQUFBQnBwZ243ZDlxMlZYenE4MjJvMGcxNjlKc2JtQ2dhZWluRmVjaV9ON00zZThzOHptbkEwX251eDVkcTc1TktlajRrbDFuYUFRRjN4UVQwdnludW5jYmNOX2NNYXc9PQ==";
 
-        const response = await fetch('https://api.openai.com/v1/chat/completions', {
+        const response = await fetch(apiUrl, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
             },
-            body: JSON.stringify({
-                model: "gpt-4o",
-                messages: [
-                    { role: "user", content: prompt },
-                ],
-                temperature: 0.7,
-            }),
+            body: JSON.stringify({ prompt }),
         });
 
         const data = await response.json();
 
-        if (!response.ok) {
-            console.error("OpenAI Chat error:", data);
-            return NextResponse.json({ error: data.error?.message || 'Chat AI failed' }, { status: response.status });
+        if (data.status === 'success') {
+            return NextResponse.json({
+                text: data.text
+            });
+        } else {
+            console.error("LLM API error:", data);
+            return NextResponse.json({ error: data.error || 'Chat AI failed' }, { status: 400 });
         }
-
-        const text = data.choices[0].message.content;
-
-        return NextResponse.json({ text });
     } catch (error) {
         console.error('Chat AI error:', error);
         return NextResponse.json({ error: error.message }, { status: 500 });

@@ -2,38 +2,32 @@ import { NextResponse } from 'next/server';
 
 export async function POST(req) {
     try {
-        const { prompt, resolution = '1024x1024', style = 'realistic' } = await req.json();
+        const { prompt } = await req.json();
 
-        if (!process.env.OPENAI_API_KEY) {
-            return NextResponse.json({ error: 'OpenAI API key is missing' }, { status: 500 });
-        }
+        // Using PicoApps Image Generation API as requested
+        const apiUrl = "https://backend.buildpicoapps.com/aero/run/image-generation-api?pk=v1-Z0FBQUFBQnBwZ243ZDlxMlZYenE4MjJvMGcxNjlKc2JtQ2dhZWluRmVjaV9ON00zZThzOHptbkEwX251eDVkcTc1TktlajRrbDFuYUFRRjN4UVQwdnludW5jYmNOX2NNYXc9PQ==";
 
-        const response = await fetch('https://api.openai.com/v1/images/generations', {
+        const response = await fetch(apiUrl, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
             },
-            body: JSON.stringify({
-                model: "dall-e-3",
-                prompt: `${style} style, ${prompt}, high resolution, professional quality`,
-                n: 1,
-                size: resolution,
-            }),
+            body: JSON.stringify({ prompt }),
         });
 
         const data = await response.json();
 
-        if (!response.ok) {
-            console.error("OpenAI error:", data);
-            return NextResponse.json({ error: data.error?.message || 'Failed to generate image' }, { status: response.status });
+        if (data.status === 'success') {
+            return NextResponse.json({
+                url: data.imageUrl,
+                imageUrl: data.imageUrl
+            });
+        } else {
+            console.error("Image API error:", data);
+            return NextResponse.json({ error: data.error || 'Failed to generate image' }, { status: 400 });
         }
-
-        const imageUrl = data.data[0].url;
-
-        return NextResponse.json({ url: imageUrl, imageUrl: imageUrl });
     } catch (error) {
-        console.error('DALL-E Generation error:', error);
+        console.error('Image Generation error:', error);
         return NextResponse.json({ error: error.message }, { status: 500 });
     }
 }
