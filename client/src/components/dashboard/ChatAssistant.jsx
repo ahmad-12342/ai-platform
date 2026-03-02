@@ -5,13 +5,13 @@ import { Send, ImageIcon, X, Download, Bot, User, Sparkles, Plus, Zap, Copy, Che
 import { useAuth } from '@/context/AuthContext';
 import { saveGeneration, checkDailyLimit } from '@/lib/firestoreService';
 
-const PERSONA = "Follow instructions precisely! If the user asks to generate, create or make an image, photo, or picture by describing it, you will reply with '/image' + description. Otherwise respond normally. Avoid additional explanations. Be helpful and clear.";
+const PERSONA = "CRITICAL INSTRUCTION: If user asks for an image, logo, art, photo or picture, you MUST ALWAYS respond with ONLY '/image ' + description. No apologies. No talk. Just '/image ...'. For other topics, be a helpful assistant.";
 
 const SUGGESTIONS = [
     { icon: '✍️', text: 'Write a professional email' },
     { icon: '🧠', text: 'Explain quantum computing' },
-    { icon: '💡', text: 'Give me startup ideas' },
-    { icon: '🎨', text: '/image futuristic city at night' },
+    { icon: '🎨', text: 'Logo for a tech startup' },
+    { icon: '✨', text: 'A futuristic floating city' },
 ];
 
 export default function ChatAssistant() {
@@ -19,11 +19,14 @@ export default function ChatAssistant() {
     const [messages, setMessages] = useState([]);
     const [input, setInput] = useState('');
     const [loading, setLoading] = useState(false);
+    const [selectedImage, setSelectedImage] = useState(null);
+    const [selectedImagePreview, setSelectedImagePreview] = useState(null);
     const [lightbox, setLightbox] = useState(null);
     const [copied, setCopied] = useState(null);
     const [showTooltip, setShowTooltip] = useState(false);
     const bottomRef = useRef(null);
     const textareaRef = useRef(null);
+    const fileInputRef = useRef(null);
 
     useEffect(() => {
         bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -54,6 +57,24 @@ export default function ChatAssistant() {
         document.body.removeChild(a);
     };
 
+    const handleImageSelect = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            setSelectedImage(file);
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setSelectedImagePreview(reader.result);
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
+    const clearSelectedImage = () => {
+        setSelectedImage(null);
+        setSelectedImagePreview(null);
+        if (fileInputRef.current) fileInputRef.current.value = '';
+    };
+
     const callApi = async (type, prompt) => {
         const endpoint = type === 'image' ? '/api/generate-image' : '/api/generate-chat';
         try {
@@ -82,17 +103,20 @@ export default function ChatAssistant() {
 
     const handleSend = async (msgOverride) => {
         const message = (msgOverride || input).trim();
-        if (!message || loading) return;
+        if ((!message && !selectedImage) || loading) return;
 
         setInput('');
+        const currentImage = selectedImagePreview;
+        clearSelectedImage();
         setLoading(true);
-        addMsg({ type: 'user', text: message });
+        addMsg({ type: 'user', text: message, userImage: currentImage });
 
         try {
-            const imageTriggers = ['generate image', 'create image', 'make a photo', 'make an image', 'draw ', 'paint ', 'picture of'];
+            // ✅ Improved Local Intent Detection
+            const imageTriggers = ['generate', 'create', 'make', 'draw', 'paint', 'photo', 'logo', 'picture', 'art', 'sketch', 'wallpaper'];
             const forcedImage = message.toLowerCase().startsWith('/image');
-            const looksLikeImagePrompt = imageTriggers.some(t => message.toLowerCase().includes(t));
-            const isIntentImage = forcedImage || (looksLikeImagePrompt && message.length < 100);
+            const containsTrigger = imageTriggers.some(t => message.toLowerCase().includes(t));
+            const isIntentImage = forcedImage || (containsTrigger && message.length < 150);
 
             if (user) {
                 const limitCheck = await checkDailyLimit(user.uid, isIntentImage ? 'image' : 'chat');
@@ -105,11 +129,13 @@ export default function ChatAssistant() {
 
             if (isIntentImage) {
                 let desc = forcedImage ? message.slice(6).trim() : message;
+                // Clean description of common triggers for better API prompt
+                const cleanTriggers = ['generate', 'create', 'make', 'draw', 'a ', 'an ', 'the '];
                 if (!forcedImage) {
-                    imageTriggers.forEach(t => { desc = desc.replace(new RegExp(t, 'gi'), '').trim(); });
+                    cleanTriggers.forEach(t => { desc = desc.replace(new RegExp(`\\b${t}\\b`, 'gi'), '').trim(); });
                 }
 
-                addMsg({ type: 'bot', text: `Generating image for "${desc}"…`, isLoading: true });
+                addMsg({ type: 'bot', text: `Designing your creation: "${desc}"…`, isLoading: true });
                 const data = await callApi('image', desc);
                 removeLoading();
                 if (data.status === 'success') {
@@ -274,8 +300,17 @@ export default function ChatAssistant() {
 
                             <div className={`flex-1 min-w-0 flex flex-col ${msg.type === 'user' ? 'items-end' : 'items-start'}`}>
                                 {msg.type === 'user' && (
-                                    <div className="px-5 py-3.5 rounded-[2rem] rounded-tr-sm bg-[#2f2f2f] text-white text-sm leading-relaxed shadow-lg">
-                                        {msg.text}
+                                    <div className="flex flex-col items-end gap-2 max-w-[80%]">
+                                        {msg.userImage && (
+                                            <div className="relative w-32 h-32 rounded-2xl overflow-hidden border border-white/10 mb-1">
+                                                <img src={msg.userImage} alt="User upload" className="w-full h-full object-cover" />
+                                            </div>
+                                        )}
+                                        {msg.text && (
+                                            <div className="px-5 py-3.5 rounded-[2rem] rounded-tr-sm bg-[#2f2f2f] text-white text-sm leading-relaxed shadow-lg">
+                                                {msg.text}
+                                            </div>
+                                        )}
                                     </div>
                                 )}
 
@@ -346,7 +381,33 @@ export default function ChatAssistant() {
 
             {/* INPUT AREA */}
             <div className="flex-shrink-0 pt-4 pb-6">
+                <AnimatePresence>
+                    {selectedImagePreview && (
+                        <motion.div
+                            initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                            animate={{ opacity: 1, y: 0, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0.95 }}
+                            className="mb-3 relative w-20 h-20 group"
+                        >
+                            <img src={selectedImagePreview} alt="Selected" className="w-full h-full object-cover rounded-2xl border-2 border-violet-500/50 shadow-lg shadow-violet-500/20" />
+                            <button
+                                onClick={clearSelectedImage}
+                                className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-lg active:scale-90"
+                            >
+                                <X className="w-3 h-3" />
+                            </button>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
+
                 <div className={`relative rounded-[2.5rem] border transition-all duration-300 bg-[#161616] p-2 ${loading ? 'border-violet-500/30' : 'border-white/10 focus-within:border-white/20 shadow-2xl shadow-black/40'}`}>
+                    <input
+                        type="file"
+                        ref={fileInputRef}
+                        onChange={handleImageSelect}
+                        accept="image/*"
+                        className="hidden"
+                    />
                     <textarea
                         ref={textareaRef}
                         value={input}
@@ -355,11 +416,19 @@ export default function ChatAssistant() {
                         placeholder="Ask me anything or use /image..."
                         rows={1}
                         disabled={loading}
-                        className="w-full bg-transparent resize-none outline-none text-white text-[15px] px-6 py-4 pr-32 placeholder:text-gray-600 leading-relaxed scrollbar-hide"
+                        className="w-full bg-transparent resize-none outline-none text-white text-[15px] px-6 py-4 pr-40 placeholder:text-gray-600 leading-relaxed scrollbar-hide"
                         style={{ maxHeight: 160 }}
                     />
 
                     <div className="absolute right-4 bottom-4 flex items-center gap-2">
+                        <button
+                            type="button"
+                            onClick={() => fileInputRef.current?.click()}
+                            title="Upload image"
+                            className="p-3 rounded-full text-gray-400 hover:text-blue-400 hover:bg-blue-500/10 transition-all active:scale-95"
+                        >
+                            <Plus className="w-5 h-5" />
+                        </button>
                         <div className="relative">
                             <button
                                 type="button"
