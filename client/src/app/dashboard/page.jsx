@@ -7,6 +7,7 @@ import { useAuth } from '@/context/AuthContext';
 
 const tools = [
     { name: "Image Gen", desc: "AI Assistant & Creation", icon: MessageSquare, color: "bg-blue-500/10 text-blue-500", href: "/dashboard/chat" },
+    { name: "Emoji Gen", desc: "Custom Emoji Engine", icon: Sparkles, color: "bg-yellow-500/10 text-yellow-500", href: "/dashboard/emoji" },
     { name: "Resume Analyzer", desc: "AI Review & Insights", icon: FileText, color: "bg-purple-500/10 text-purple-500", href: "/dashboard/resume" },
     { name: "Story Generator", desc: "Children's Book Engine", icon: BookOpen, color: "bg-pink-500/10 text-pink-500", href: "/dashboard/story" },
 ];

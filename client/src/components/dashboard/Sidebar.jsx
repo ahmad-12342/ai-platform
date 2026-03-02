@@ -20,6 +20,7 @@ import { cn } from '@/lib/utils';
 const menuItems = [
     { icon: LayoutDashboard, label: 'Overview', href: '/dashboard' },
     { icon: MessageSquare, label: 'Image Gen', href: '/dashboard/chat' },
+    { icon: Sparkles, label: 'Emoji Gen', href: '/dashboard/emoji' },
     { icon: FileText, label: 'Resume Analyzer', href: '/dashboard/resume' },
     { icon: BookOpen, label: 'Story Generator', href: '/dashboard/story' },
 ];

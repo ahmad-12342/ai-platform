@@ -40,7 +40,8 @@ export async function syncUser(user) {
                 image: 0,
                 chat: 0,
                 resume: 0,
-                story: 0
+                story: 0,
+                emoji: 0
             },
             lastUsageDate: new Date().toISOString().split('T')[0],
             createdAt: serverTimestamp(),
@@ -73,11 +74,11 @@ export async function saveGeneration({ uid, type, prompt, resultUrl = null, text
     const userSnap = await getDoc(userRef);
     const userData = userSnap.data();
 
-    let dailyCounts = userData?.dailyCounts || { image: 0, chat: 0, resume: 0, story: 0 };
+    let dailyCounts = userData?.dailyCounts || { image: 0, chat: 0, resume: 0, story: 0, emoji: 0 };
 
     // Reset counts if it's a new day
     if (userData?.lastUsageDate !== today) {
-        dailyCounts = { image: 0, chat: 0, resume: 0, story: 0 };
+        dailyCounts = { image: 0, chat: 0, resume: 0, story: 0, emoji: 0 };
     }
 
     // Increment count for this type
@@ -121,7 +122,7 @@ export async function checkDailyLimit(uid, type) {
     if (userData.plan === 'pro') return { allowed: true };
 
     const today = new Date().toISOString().split('T')[0];
-    let counts = userData.dailyCounts || { image: 0, chat: 0, resume: 0, story: 0 };
+    let counts = userData.dailyCounts || { image: 0, chat: 0, resume: 0, story: 0, emoji: 0 };
 
     // Reset if new day
     if (userData.lastUsageDate !== today) {
@@ -132,7 +133,8 @@ export async function checkDailyLimit(uid, type) {
         image: 5,
         chat: 10,
         resume: 2,
-        story: 2
+        story: 2,
+        emoji: 10
     };
 
     const currentCount = counts[type] || 0;
