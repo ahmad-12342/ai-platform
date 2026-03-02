@@ -19,8 +19,7 @@ import { cn } from '@/lib/utils';
 
 const menuItems = [
     { icon: LayoutDashboard, label: 'Overview', href: '/dashboard' },
-    { icon: MessageSquare, label: 'AI Chat', href: '/dashboard/chat' },
-    { icon: ImageIcon, label: 'Image Gen', href: '/dashboard/images' },
+    { icon: MessageSquare, label: 'Image Gen', href: '/dashboard/chat' },
     { icon: FileText, label: 'Resume Analyzer', href: '/dashboard/resume' },
     { icon: BookOpen, label: 'Story Generator', href: '/dashboard/story' },
 ];

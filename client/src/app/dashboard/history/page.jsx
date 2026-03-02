@@ -13,9 +13,15 @@ const typeIcon = {
     story: BookOpen,
 };
 
+const typeLabel = {
+    chat: 'Image Gen',
+    image: 'Detailed Gen',
+    resume: 'Resume AI',
+    story: 'Story Gen',
+};
 const typeColor = {
-    chat: "text-indigo-400 bg-indigo-500/10 border-indigo-500/20",
-    image: "text-blue-400 bg-blue-500/10 border-blue-500/20",
+    chat: "text-blue-400 bg-blue-500/10 border-blue-500/20",
+    image: "text-indigo-400 bg-indigo-500/10 border-indigo-500/20",
     resume: "text-purple-400 bg-purple-500/10 border-purple-500/20",
     story: "text-pink-400 bg-pink-500/10 border-pink-500/20",
 };
@@ -111,7 +117,7 @@ export default function HistoryPage() {
                             className={`px-4 py-2 rounded-xl text-sm font-bold transition-all whitespace-nowrap ${filter === f ? 'bg-primary text-white shadow-lg shadow-primary/25' : 'text-gray-500 hover:text-white'
                                 }`}
                         >
-                            {f === 'all' ? 'All Creations' : f.charAt(0).toUpperCase() + f.slice(1)}
+                            {f === 'all' ? 'All Creations' : f === 'chat' ? 'Image Gen' : f.charAt(0).toUpperCase() + f.slice(1)}
                         </button>
                     ))}
                 </div>

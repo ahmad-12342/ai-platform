@@ -3,10 +3,8 @@ import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Send, ImageIcon, X, Download, Bot, User, Sparkles, Plus, Zap, Copy, Check } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
-import { saveGeneration, checkDailyLimit } from '@/lib/firestoreService';
+import { checkDailyLimit } from '@/lib/firestoreService';
 
-const LLM_API = 'https://backend.buildpicoapps.com/aero/run/llm-api?pk=v1-Z0FBQUFBQnBwV3BTQlJsVzhHQ0VqMFZjVWt1bWhRTER3eGtsLWJGSkJCLWR5cEl6aVBHRjdtei1PVEdVbUtSRHlMVldCQklJT2RfelVvVldCRXdQZGNTOGtvTlNzM2t0Y0E5PQ==';
-const IMG_API = 'https://backend.buildpicoapps.com/aero/run/image-generation-api?pk=v1-Z0FBQUFBQnBwV3BTQlJsVzhHQ0VqMFZjVWt1bWhRTER3eGtsLWJGSkJCLWR5cEl6aVBHRjdtei1PVEdVbUtSRHlMVldCQklJT2RfelVvVldCRXdQZGNTOGtvTlNzM2t0Y0E5PQ==';
 const PERSONA = "Follow instructions precisely! If the user asks to generate, create or make an image, photo, or picture by describing it, you will reply with '/image' + description. Otherwise respond normally. Be helpful, concise, and clear.";
 
 const SUGGESTIONS = [
@@ -24,7 +22,6 @@ export default function ChatAssistant() {
     const [lightbox, setLightbox] = useState(null);
     const [copied, setCopied] = useState(null);
     const bottomRef = useRef(null);
-    const inputRef = useRef(null);
     const textareaRef = useRef(null);
 
     useEffect(() => {
@@ -57,13 +54,30 @@ export default function ChatAssistant() {
         document.body.removeChild(a);
     };
 
-    const callApi = async (url, prompt) => {
-        const res = await fetch(url, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ prompt }),
-        });
-        return res.json();
+    const callApi = async (type, prompt) => {
+        const endpoint = type === 'image' ? '/api/generate-image' : '/api/generate-chat';
+        try {
+            const res = await fetch(endpoint, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    prompt: type === 'chat' ? (PERSONA + prompt) : prompt,
+                    firebaseId: user?.uid
+                }),
+            });
+            const data = await res.json();
+
+            if (res.ok) {
+                return {
+                    status: 'success',
+                    imageUrl: data.imageUrl || data.url,
+                    text: data.text
+                };
+            }
+            return { status: 'error', message: data.error || 'Request failed' };
+        } catch (err) {
+            return { status: 'error', message: err.message };
+        }
     };
 
     const handleSend = async (msgOverride) => {
@@ -98,7 +112,7 @@ export default function ChatAssistant() {
                 }
 
                 addMsg({ type: 'bot', text: `Generating image for "${desc}"…`, isLoading: true });
-                const data = await callApi(IMG_API, desc);
+                const data = await callApi('image', desc);
                 removeLoading();
                 if (data.status === 'success') {
                     addMsg({ type: 'image', imageUrl: data.imageUrl, prompt: desc });
@@ -114,10 +128,12 @@ export default function ChatAssistant() {
                         });
                         refreshStats();
                     }
-                } else addMsg({ type: 'bot', text: '⚠️ Image generation failed. Please try again.' });
+                } else {
+                    addMsg({ type: 'bot', text: `⚠️ Image generation failed: ${data.message || 'Unknown error'}` });
+                }
             } else {
                 addMsg({ type: 'bot', text: '', isLoading: true });
-                const data = await callApi(LLM_API, PERSONA + message);
+                const data = await callApi('chat', message);
                 removeLoading();
                 if (data.status === 'success') {
                     // Detection from LLM response (command mode)
@@ -127,7 +143,7 @@ export default function ChatAssistant() {
                         const desc = match ? match[1].trim() : data.text.replace('/image', '').trim();
 
                         addMsg({ type: 'bot', text: `Generating requested image…`, isLoading: true });
-                        const imgData = await callApi(IMG_API, desc);
+                        const imgData = await callApi('image', desc);
                         removeLoading();
                         if (imgData.status === 'success') {
                             addMsg({ type: 'image', imageUrl: imgData.imageUrl, prompt: desc });
@@ -143,6 +159,8 @@ export default function ChatAssistant() {
                                 });
                                 refreshStats();
                             }
+                        } else {
+                            addMsg({ type: 'bot', text: `⚠️ Image generation failed: ${imgData.message || 'Unknown error'}` });
                         }
                     } else {
                         addMsg({ type: 'bot', text: data.text });
@@ -160,7 +178,7 @@ export default function ChatAssistant() {
                         }
                     }
                 } else {
-                    addMsg({ type: 'bot', text: '⚠️ Something went wrong. Please try again.' });
+                    addMsg({ type: 'bot', text: `⚠️ AI Chat failed: ${data.message || 'Something went wrong'}` });
                 }
             }
         } catch (e) {
@@ -169,7 +187,7 @@ export default function ChatAssistant() {
             addMsg({ type: 'bot', text: '⚠️ Network error. Please check your connection.' });
         } finally {
             setLoading(false);
-            inputRef.current?.focus();
+            textareaRef.current?.focus();
         }
     };
 
@@ -192,8 +210,8 @@ export default function ChatAssistant() {
                         <Sparkles className="w-4 h-4 text-white" />
                     </div>
                     <div>
-                        <h1 className="text-lg font-bold text-white leading-none">Promptova AI</h1>
-                        <p className="text-[11px] text-gray-500 mt-0.5">Neural Chat · Image Gen</p>
+                        <h1 className="text-lg font-bold text-white leading-none">Image Gen</h1>
+                        <p className="text-[11px] text-gray-500 mt-0.5">Versatile AI Creation</p>
                     </div>
                 </div>
                 <button
@@ -208,8 +226,6 @@ export default function ChatAssistant() {
             {/* ── CHAT FEED ── */}
             <div className="flex-1 overflow-y-auto space-y-1 pb-4 no-scrollbar">
                 <AnimatePresence initial={false}>
-
-                    {/* Empty state */}
                     {isEmpty && (
                         <motion.div
                             key="empty"
@@ -242,7 +258,6 @@ export default function ChatAssistant() {
                         </motion.div>
                     )}
 
-                    {/* Messages */}
                     {messages.map((msg) => (
                         <motion.div
                             key={msg.id}
@@ -251,8 +266,7 @@ export default function ChatAssistant() {
                             transition={{ duration: 0.2 }}
                             className={`group flex gap-4 px-2 py-3 rounded-2xl transition-colors ${msg.type === 'user' ? 'flex-row-reverse' : ''} ${msg.type !== 'user' && !msg.isLoading ? 'hover:bg-white/[0.02]' : ''}`}
                         >
-                            {/* Avatar */}
-                            {msg.type !== 'image' && (
+                            {!msg.imageUrl && (
                                 <div className={`w-8 h-8 rounded-full flex-shrink-0 flex items-center justify-center text-xs font-bold mt-0.5 ${msg.type === 'user'
                                     ? 'bg-gradient-to-br from-blue-500 to-indigo-600 text-white'
                                     : 'bg-gradient-to-br from-violet-600 to-indigo-600 text-white'
@@ -261,7 +275,6 @@ export default function ChatAssistant() {
                                 </div>
                             )}
 
-                            {/* Content */}
                             <div className={`flex-1 min-w-0 ${msg.type === 'user' ? 'flex justify-end' : ''}`}>
                                 {msg.type === 'user' && (
                                     <div className="inline-block max-w-[80%] px-4 py-3 rounded-2xl rounded-tr-sm bg-[#2f2f2f] text-white text-sm leading-relaxed">
@@ -271,7 +284,7 @@ export default function ChatAssistant() {
 
                                 {msg.type === 'bot' && (
                                     <div className="max-w-[90%]">
-                                        <p className="text-[11px] font-bold text-violet-400 mb-1.5 uppercase tracking-widest">Promptova AI</p>
+                                        <p className="text-[11px] font-bold text-violet-400 mb-1.5 uppercase tracking-widest">Image Gen AI</p>
                                         {msg.isLoading ? (
                                             <div className="flex items-center gap-1.5 py-2">
                                                 <span className="w-2 h-2 bg-violet-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
@@ -293,7 +306,7 @@ export default function ChatAssistant() {
                                     </div>
                                 )}
 
-                                {msg.type === 'image' && (
+                                {msg.imageUrl && (
                                     <div className="flex flex-col items-center gap-3 py-2 w-full">
                                         {msg.prompt && (
                                             <p className="text-xs text-gray-500 italic self-start">
@@ -343,7 +356,7 @@ export default function ChatAssistant() {
                         value={input}
                         onChange={e => setInput(e.target.value)}
                         onKeyDown={handleKey}
-                        placeholder="Message Promptova AI… (Shift+Enter for new line)"
+                        placeholder="Message Image Gen… (Shift+Enter for new line)"
                         rows={1}
                         disabled={loading}
                         className="w-full bg-transparent resize-none outline-none text-white text-sm px-5 pt-4 pb-12 placeholder:text-gray-600 leading-relaxed"
@@ -352,7 +365,7 @@ export default function ChatAssistant() {
                     <div className="absolute bottom-3 right-3 flex items-center gap-2">
                         <button
                             type="button"
-                            onClick={() => { setInput('/image '); inputRef.current?.focus(); textareaRef.current?.focus(); }}
+                            onClick={() => { setInput('/image '); textareaRef.current?.focus(); }}
                             title="Generate image"
                             className="p-2 rounded-xl text-gray-500 hover:text-violet-400 hover:bg-violet-500/10 transition-all"
                         >
@@ -368,7 +381,7 @@ export default function ChatAssistant() {
                     </div>
                 </div>
                 <p className="text-center text-[10px] text-gray-600 mt-2">
-                    Promptova AI can make mistakes. Verify important info.
+                    Image Gen can make mistakes. Verify important info.
                 </p>
             </div>
 

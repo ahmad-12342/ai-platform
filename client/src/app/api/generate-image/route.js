@@ -1,26 +1,30 @@
 import { NextResponse } from 'next/server';
+import OpenAI from 'openai';
 
-const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5000';
+const openai = new OpenAI({
+    apiKey: process.env.OPENAI_API_KEY,
+});
 
 export async function POST(req) {
     try {
-        const body = await req.json();
-        // Forward to Express backend which handles credits, saving & tracking
-        const response = await fetch(`${BACKEND_URL}/api/generate/image`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(body),
-        });
+        const { prompt, resolution = '1024x1024', style = 'realistic' } = await req.json();
 
-        const data = await response.json();
-
-        if (!response.ok) {
-            return NextResponse.json({ error: data.error || data.message }, { status: response.status });
+        if (!process.env.OPENAI_API_KEY) {
+            return NextResponse.json({ error: 'OpenAI API key is missing' }, { status: 500 });
         }
 
-        return NextResponse.json(data);
+        const response = await openai.images.generate({
+            model: "dall-e-3",
+            prompt: `${style} style, ${prompt}, high resolution, professional quality`,
+            n: 1,
+            size: resolution,
+        });
+
+        const imageUrl = response.data[0].url;
+
+        return NextResponse.json({ url: imageUrl, imageUrl: imageUrl });
     } catch (error) {
-        console.error('Generate image proxy error:', error);
+        console.error('DALL-E Generation error:', error);
         return NextResponse.json({ error: error.message }, { status: 500 });
     }
 }

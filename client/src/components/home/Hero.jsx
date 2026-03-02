@@ -41,7 +41,7 @@ const Hero = () => {
                     </h1>
 
                     <p className="text-xl text-gray-400 max-w-2xl mx-auto mb-10 leading-relaxed">
-                        Generate stunning AI images, cinematic videos, professional CVs, and high-quality content
+                        Generate cinematic videos, professional CVs, and high-quality content
                         all in one powerful platform.
                     </p>
 
@@ -76,7 +76,6 @@ const Hero = () => {
                     className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-20"
                 >
                     {[
-                        { icon: ImageIcon, label: "AI Image Gen", color: "text-blue-400" },
                         { icon: Video, label: "AI Video Studio", color: "text-purple-400" },
                         { icon: FileText, label: "Professional CV", color: "text-pink-400" },
                         { icon: Sparkles, label: "AI Content Writer", color: "text-orange-400" },

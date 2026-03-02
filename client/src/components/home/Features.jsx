@@ -5,12 +5,6 @@ import { ImageIcon, Video, FileText, Cpu, Zap, Shield, Globe, Layers } from 'luc
 
 const features = [
     {
-        title: "AI Image Generation",
-        description: "Convert text into stunning visual masterpieces with absolute precision and creative styles.",
-        icon: ImageIcon,
-        color: "bg-blue-500/10 text-blue-500",
-    },
-    {
         title: "AI Video Creation",
         description: "Bring your prompts to life with high-definition AI videos in multiple aspect ratios.",
         icon: Video,
