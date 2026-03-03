@@ -1,7 +1,7 @@
 "use client";
 import React from 'react';
 import Link from 'next/link';
-import { Sparkles, Twitter, Github, Linkedin, Instagram } from 'lucide-react';
+import { Twitter, Github, Linkedin, Instagram } from 'lucide-react';
 
 const Footer = () => {
     return (
@@ -9,10 +9,8 @@ const Footer = () => {
             <div className="container mx-auto px-6">
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
                     <div className="col-span-1 md:col-span-1">
-                        <Link href="/" className="flex items-center gap-2 mb-6">
-                            <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-                                <Sparkles className="text-white w-5 h-5" />
-                            </div>
+                        <Link href="/" className="flex items-center gap-3 mb-6">
+                            <img src="/logo.png" alt="Promptova AI Logo" className="w-10 h-10 rounded-lg shadow-lg" />
                             <span className="text-xl font-bold">Promptova AI</span>
                         </Link>
                         <p className="text-gray-400 mb-6">
@@ -29,10 +27,10 @@ const Footer = () => {
                     <div>
                         <h4 className="font-bold mb-6">Tools</h4>
                         <ul className="space-y-4 text-gray-400">
-                            <li><Link href="/dashboard/images" className="hover:text-white transition-colors">AI Image Generator</Link></li>
-                            <li><Link href="/dashboard/videos" className="hover:text-white transition-colors">AI Video Studio</Link></li>
-                            <li><Link href="/dashboard/cv" className="hover:text-white transition-colors">Resume Builder</Link></li>
-                            <li><Link href="/dashboard/content" className="hover:text-white transition-colors">Content Writer</Link></li>
+                            <li><Link href="/dashboard/chat" className="hover:text-white transition-colors">AI Image Generator</Link></li>
+                            <li><Link href="/dashboard/emoji" className="hover:text-white transition-colors">AI Emoji Gen</Link></li>
+                            <li><Link href="/dashboard/resume" className="hover:text-white transition-colors">Resume AI</Link></li>
+                            <li><Link href="/dashboard/story" className="hover:text-white transition-colors">Story Generator</Link></li>
                         </ul>
                     </div>
 
