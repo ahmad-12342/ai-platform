@@ -56,8 +56,8 @@ export default function ProfilePage() {
                     <div className="text-center md:text-left flex-1">
                         <div className="flex flex-col md:flex-row md:items-center gap-3 mb-2">
                             <h1 className="text-3xl font-bold text-white">{user?.displayName || 'Creative User'}</h1>
-                            <span className="inline-flex items-center px-3 py-1 bg-primary/20 text-primary rounded-full text-xs font-black uppercase tracking-widest border border-primary/20">
-                                {userStats?.plan || 'Free'} Plan
+                            <span className="inline-flex items-center px-3 py-1 bg-green-500/10 text-green-400 rounded-full text-[10px] font-black uppercase tracking-widest border border-green-500/20">
+                                Unlimited Access
                             </span>
                         </div>
                         <p className="text-gray-400 flex items-center justify-center md:justify-start gap-2 mb-4">
@@ -138,22 +138,17 @@ export default function ProfilePage() {
                 <motion.div
                     initial={{ opacity: 0, x: 20 }}
                     animate={{ opacity: 1, x: 0 }}
-                    className="glass p-8 rounded-[2.5rem] border border-white/10 bg-gradient-to-br from-primary/5 to-transparent flex flex-col justify-between"
+                    className="glass p-8 rounded-[2.5rem] border border-white/10 bg-gradient-to-br from-green-500/5 to-transparent flex flex-col justify-center text-center"
                 >
-                    <div>
-                        <h2 className="text-xl font-bold mb-4">Membership Status</h2>
-                        <p className="text-gray-400 text-sm leading-relaxed mb-6">
-                            You are currently on the <strong className="text-white italic">{userStats?.plan?.toUpperCase()}</strong> plan.
-                            Upgrade to Pro to unlock unlimited generations, HD Video, and commercial usage rights.
+                    <div className="space-y-4">
+                        <div className="w-16 h-16 bg-green-500/10 rounded-2xl flex items-center justify-center mx-auto">
+                            <ShieldCheck className="w-8 h-8 text-green-400" />
+                        </div>
+                        <h2 className="text-2xl font-bold text-white">Full License</h2>
+                        <p className="text-gray-400 text-sm leading-relaxed">
+                            Your account has been granted full access to all Promptova AI features. Enjoy unlimited generations with no restrictions.
                         </p>
                     </div>
-                    {userStats?.plan !== 'pro' && (
-                        <Link href="/#pricing">
-                            <button className="w-full py-4 rounded-full bg-primary text-white font-bold hover:bg-primary/90 transition-all shadow-lg shadow-primary/20 flex items-center justify-center gap-2">
-                                <Sparkles className="w-4 h-4" /> Upgrade to Pro
-                            </button>
-                        </Link>
-                    )}
                 </motion.div>
             </div>
         </div>

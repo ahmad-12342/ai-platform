@@ -74,7 +74,6 @@ export default function AdminPanel() {
     const [loadingData, setLoading] = useState(true);
     const [search, setSearch] = useState('');
     const [expanded, setExpanded] = useState(null);
-    const [planSaving, setPlanSaving] = useState(null);
     const [deleteConfirm, setDeleteConfirm] = useState(null);
     const [editCredits, setEditCredits] = useState(null);
 
@@ -103,21 +102,13 @@ export default function AdminPanel() {
             // Compute stats
             const totalCredits = allUsers.reduce((s, u) => s + (u.credits || 0), 0);
             const totalGens = allUsers.reduce((s, u) => s + (u.totalGenerations || 0), 0);
-            const proUsers = allUsers.filter(u => u.plan === 'pro').length;
-            setStats({ totalUsers: allUsers.length, totalGens, totalCredits, proUsers });
+            setStats({ totalUsers: allUsers.length, totalGens, totalCredits });
         } catch (e) { console.error(e); }
         finally { setLoading(false); }
     }, [user]);
 
     useEffect(() => { fetchData(); }, [fetchData]);
 
-    // ── Change plan ──
-    const changePlan = async (uid, plan) => {
-        setPlanSaving(uid);
-        await updateDoc(doc(db, 'users', uid), { plan });
-        setUsers(prev => prev.map(u => u.uid === uid ? { ...u, plan } : u));
-        setPlanSaving(null);
-    };
 
     // ── Delete user ──
     const deleteUser = async (uid) => {
@@ -204,34 +195,12 @@ export default function AdminPanel() {
                         {/* ── OVERVIEW ── */}
                         {tab === 'overview' && (
                             <motion.div key="overview" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="space-y-8">
-                                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                     <StatCard icon={Users} label="Total Users" value={stats?.totalUsers} color="bg-blue-600" />
                                     <StatCard icon={Sparkles} label="Total Generations" value={stats?.totalGens} color="bg-purple-600" />
                                     <StatCard icon={CreditCard} label="Total Credits (all)" value={stats?.totalCredits} color="bg-green-600" />
-                                    <StatCard icon={Zap} label="Pro Users" value={stats?.proUsers} color="bg-orange-600" sub={`${Math.round((stats?.proUsers / stats?.totalUsers) * 100) || 0}% of all users`} />
                                 </div>
 
-                                {/* Plan breakdown */}
-                                <div className="glass rounded-[2rem] border border-white/10 p-8">
-                                    <h2 className="text-lg font-bold mb-6 flex items-center gap-2"><TrendingUp className="w-5 h-5 text-primary" /> Plan Breakdown</h2>
-                                    <div className="space-y-4">
-                                        {['free', 'pro'].map(plan => {
-                                            const count = users.filter(u => u.plan === plan).length;
-                                            const pct = Math.round((count / (users.length || 1)) * 100);
-                                            return (
-                                                <div key={plan}>
-                                                    <div className="flex justify-between text-sm mb-1">
-                                                        <span className="font-bold capitalize text-white">{plan}</span>
-                                                        <span className="text-gray-400">{count} users · {pct}%</span>
-                                                    </div>
-                                                    <div className="h-2 bg-white/5 rounded-full overflow-hidden">
-                                                        <div className={`h-full rounded-full ${plan === 'pro' ? 'bg-yellow-500' : 'bg-blue-500'}`} style={{ width: `${pct}%` }} />
-                                                    </div>
-                                                </div>
-                                            );
-                                        })}
-                                    </div>
-                                </div>
 
                                 {/* Recent signups */}
                                 <div className="glass rounded-[2rem] border border-white/10 p-8">
@@ -248,9 +217,6 @@ export default function AdminPanel() {
                                                         <p className="text-xs text-gray-500">{u.email}</p>
                                                     </div>
                                                 </div>
-                                                <span className={`text-[10px] font-black uppercase px-2 py-1 rounded-full border ${u.plan === 'pro' ? 'text-yellow-400 bg-yellow-500/10 border-yellow-500/20' : 'text-gray-400 bg-white/5 border-white/10'}`}>
-                                                    {u.plan}
-                                                </span>
                                             </div>
                                         ))}
                                     </div>
@@ -293,9 +259,6 @@ export default function AdminPanel() {
                                                     </div>
                                                 </div>
                                                 <div className="flex items-center gap-3">
-                                                    <span className={`hidden sm:block text-[10px] font-black uppercase px-2.5 py-1 rounded-full border ${u.plan === 'pro' ? 'text-yellow-400 bg-yellow-500/10 border-yellow-500/20' : 'text-gray-400 bg-white/5 border-white/10'}`}>
-                                                        {u.plan}
-                                                    </span>
                                                     <span className="text-xs text-gray-500">{u.credits ?? 0} cr</span>
                                                     {expanded === u.uid ? <ChevronUp className="w-4 h-4 text-gray-500" /> : <ChevronDown className="w-4 h-4 text-gray-500" />}
                                                 </div>
@@ -331,27 +294,6 @@ export default function AdminPanel() {
                                                                 <p className="text-xs font-mono text-gray-300 break-all">{u.uid}</p>
                                                             </div>
 
-                                                            {/* Plan change */}
-                                                            <div>
-                                                                <p className="text-[10px] text-gray-500 uppercase font-bold mb-2">Change Plan</p>
-                                                                <div className="flex gap-2">
-                                                                    {['free', 'pro'].map(plan => (
-                                                                        <button
-                                                                            key={plan}
-                                                                            onClick={() => changePlan(u.uid, plan)}
-                                                                            disabled={u.plan === plan || planSaving === u.uid}
-                                                                            className={`flex-1 py-2 rounded-xl text-xs font-bold border transition-all flex items-center justify-center gap-1.5 disabled:opacity-40
-                                                                                ${plan === 'pro'
-                                                                                    ? 'bg-yellow-500/10 border-yellow-500/20 text-yellow-400 hover:bg-yellow-500/20'
-                                                                                    : 'bg-white/5 border-white/10 text-gray-300 hover:bg-white/10'
-                                                                                }`}
-                                                                        >
-                                                                            {planSaving === u.uid ? <Loader2 className="w-3 h-3 animate-spin" /> : (u.plan === plan ? <Check className="w-3 h-3" /> : null)}
-                                                                            {plan.toUpperCase()}
-                                                                        </button>
-                                                                    ))}
-                                                                </div>
-                                                            </div>
 
                                                             {/* Credits editor */}
                                                             <div>
