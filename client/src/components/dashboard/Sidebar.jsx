@@ -13,9 +13,11 @@ import {
     LogOut,
     ChevronRight,
     MessageSquare,
-    BookOpen
+    BookOpen,
+    Shield
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useAuth } from '@/context/AuthContext';
 
 const menuItems = [
     { icon: LayoutDashboard, label: 'Overview', href: '/dashboard' },
@@ -31,6 +33,7 @@ const secondaryItems = [
 
 const Sidebar = () => {
     const pathname = usePathname();
+    const { user, logout } = useAuth();
 
     return (
         <aside className="w-64 h-screen glass border-r border-white/10 flex flex-col p-6 print:hidden">
@@ -39,7 +42,7 @@ const Sidebar = () => {
                 <span className="text-xl font-bold">Promptova AI</span>
             </Link>
 
-            <div className="flex-1 flex flex-col gap-8">
+            <div className="flex-1 flex flex-col gap-8 overflow-y-auto pr-2 custom-scrollbar">
                 <div>
                     <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-4 pl-2">Main Menu</p>
                     <div className="flex flex-col gap-1">
@@ -84,14 +87,31 @@ const Sidebar = () => {
                         ))}
                     </div>
                 </div>
+
+                {user?.email === 'muhammadansariahmad323@gmail.com' && (
+                    <div>
+                        <p className="text-xs font-bold text-red-500/80 uppercase tracking-widest mb-4 pl-2">Restricted</p>
+                        <Link
+                            href="/admin"
+                            className={cn(
+                                "flex items-center gap-3 p-3 rounded-xl transition-all border border-red-500/10 hover:bg-red-500/10 hover:text-red-400 text-red-500/80",
+                                pathname === '/admin' && "bg-red-500/20 text-red-400 border-red-500/30"
+                            )}
+                        >
+                            <Shield className="w-5 h-5" />
+                            <span className="font-medium">Admin Panel</span>
+                        </Link>
+                    </div>
+                )}
             </div>
 
-            <button className="flex items-center gap-3 p-3 rounded-xl text-gray-400 hover:text-red-400 hover:bg-red-400/10 transition-all mt-auto mb-4">
+            <button
+                onClick={logout}
+                className="flex items-center gap-3 p-3 rounded-xl text-gray-400 hover:text-red-400 hover:bg-red-400/10 transition-all mt-auto mb-4"
+            >
                 <LogOut className="w-5 h-5" />
                 <span className="font-medium">Sign Out</span>
             </button>
-
-
         </aside>
     );
 };
