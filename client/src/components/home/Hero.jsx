@@ -1,7 +1,7 @@
 "use client";
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Sparkles, Image as ImageIcon, Video, FileText } from 'lucide-react';
+import { Sparkles, Image as ImageIcon, FileText, BookOpen } from 'lucide-react';
 import Link from 'next/link';
 
 const Hero = () => {
