@@ -51,7 +51,7 @@ export default function ChatAssistant() {
     const downloadImage = (url) => {
         const a = document.createElement('a');
         a.href = url;
-        a.download = `lumetrix-ai-${Date.now()}.png`;
+        a.download = `promptovaai-${Date.now()}.png`;
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
@@ -464,7 +464,7 @@ export default function ChatAssistant() {
                     </div>
                 </div>
                 <p className="text-center text-[10px] text-gray-600 mt-3 font-medium uppercase tracking-[0.2em]">
-                    Lumetrix AI Assistant • Versatile Insight & Creation
+                    PromptovaAI Assistant • Versatile Insight & Creation
                 </p>
             </div>
 
