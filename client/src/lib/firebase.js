@@ -1,4 +1,4 @@
-import { initializeApp, getApps } from "firebase/app";
+import { initializeApp, getApps, getApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 
@@ -12,23 +12,26 @@ const firebaseConfig = {
     measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID,
 };
 
+// Initialize Firebase only once
 let app;
-let auth;
-let db;
-
-if (firebaseConfig.apiKey) {
-    app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
-    auth = getAuth(app);
-    db = getFirestore(app);
+if (!getApps().length) {
+    app = initializeApp(firebaseConfig);
 } else {
-    console.warn("Firebase configuration is missing!");
-    app = null;
-    auth = {
-        currentUser: null,
-        onAuthStateChanged: () => () => { },
-    };
-    db = null;
+    app = getApp();
 }
 
-export { auth, db };
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+// Safety logs to verify initialization in browser console
+if (typeof window !== 'undefined') {
+    if (!firebaseConfig.apiKey) {
+        console.error("❌ Firebase API Key is missing! Check your .env.local file.");
+    } else {
+        console.log("✅ Firebase initialized successfully.");
+    }
+}
+
+export { auth, db, app };
 export default app;
+
