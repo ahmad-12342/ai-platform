@@ -12,26 +12,35 @@ const firebaseConfig = {
     measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID,
 };
 
-// Initialize Firebase only once
+// Defensive check for initialization
 let app;
-if (!getApps().length) {
-    app = initializeApp(firebaseConfig);
-} else {
-    app = getApp();
+try {
+    if (!getApps().length) {
+        // Only initialize if we have the minimum required config
+        if (firebaseConfig.apiKey) {
+            app = initializeApp(firebaseConfig);
+        } else {
+            console.error("Firebase API Key is missing! Check Vercel Environment Variables.");
+            // Return a dummy app object to prevent crashes, but it won't work
+            app = { name: '[DEFAULT]', options: {}, automaticDataCollectionEnabled: false };
+        }
+    } else {
+        app = getApp();
+    }
+} catch (e) {
+    console.error("Firebase App initialization error:", e);
 }
 
-const auth = getAuth(app);
-const db = getFirestore(app);
+// Ensure auth and db are only initialized if app is valid
+const auth = app && app.options ? getAuth(app) : null;
+const db = app && app.options ? getFirestore(app) : null;
 
 // Safety logs to verify initialization in browser console
-if (typeof window !== 'undefined') {
-    if (!firebaseConfig.apiKey) {
-        console.error("❌ Firebase API Key is missing! Check your .env.local file.");
-    } else {
-        console.log("✅ Firebase initialized successfully.");
-    }
+if (typeof window !== 'undefined' && !firebaseConfig.apiKey) {
+    console.warn("⚠️ Firebase configuration not found. Please set NEXT_PUBLIC_FIREBASE_API_KEY in Vercel.");
 }
 
 export { auth, db, app };
 export default app;
+
 

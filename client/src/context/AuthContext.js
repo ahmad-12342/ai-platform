@@ -46,6 +46,10 @@ export const AuthProvider = ({ children }) => {
     }, [user, fetchProfile]);
 
     useEffect(() => {
+        if (!auth) {
+            setLoading(false);
+            return;
+        }
         const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
             if (firebaseUser) {
                 const userData = {
@@ -73,6 +77,7 @@ export const AuthProvider = ({ children }) => {
 
         return () => unsubscribe();
     }, [fetchProfile]);
+
 
     const logout = async () => {
         await firebaseSignOut(auth);
